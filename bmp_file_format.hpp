@@ -14,6 +14,7 @@ struct	bmp_file_header
 	uint32_t	offbits;	// The offset, i.e. starting address, of the byte where the bitmap image data (pixel array) can be found.
 };
 
+// 40 bytes
 struct bmp_info_header
 {
 	uint32_t	size;					// the size of this header, in bytes (40)
