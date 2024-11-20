@@ -79,7 +79,7 @@ int	bmp_serializer()
 		}
 		catch (const std::exception& e)
 		{
-			std::cout << "exception" << std::endl;
+			std::cerr << "exception" << std::endl;
 			return 0;
 		}
 	}
@@ -122,7 +122,7 @@ int	bmp_serializer()
 	catch (const std::exception& e)
 	{
 		delete[] color_table;
-		std::cout << "exception" << std::endl;
+		std::cerr << "exception" << std::endl;
 		return 0;
 	}
 
@@ -131,7 +131,7 @@ int	bmp_serializer()
 	std::ofstream	outfile("test.bmp", std::ios::binary);
 	if (outfile.is_open() == 0)
 	{
-		std::cout << "Cannot open file" << std::endl;
+		std::cerr << "Cannot open file" << std::endl;
 		delete[] color_table;
 		delete[] pixel_data;
 		return 0;
