@@ -46,7 +46,6 @@ int	bmp_serializer()
 	file_header.size = \
 					   sizeof(struct bmp_file_header) \
 					   + sizeof(struct bmp_info_header) \
-//					   + (info_header.color_number == 0 ? 0 : (info_header.color_number << 2))
 					   + color_table_size \
 					   + padded_matrix_size;
 
