@@ -17,7 +17,7 @@ int	bmp_serializer()
 	file_header.type = 0x4D42;
 	// file header size + info header size + palette size + pixel data
 	// 각 픽셀 크기는 bits_per_pixel에 따름, 픽셀 개수는 너비와 동, 패딩 사이즈 = (4 - (pixel % 4)) % 4
-	// palette 크기는 조건부
+	// palette 크기는 조건부. 비트 깊이가 8비트 이하일 때만 적용.
 	uint16_t	pixel_size = (info_header.bits_per_pixel + 7) / 8;
 	uint16_t	padding = (4 - ((pixel_size * info_header.width) % 4)) % 4;
 	file_header.size = \
