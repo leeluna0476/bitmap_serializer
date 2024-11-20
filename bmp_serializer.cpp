@@ -1,5 +1,4 @@
 #include "bmp_file_format.hpp"
-#include <math.h>
 
 int	bmp_serializer()
 {

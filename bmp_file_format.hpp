@@ -3,15 +3,15 @@
 
 # include <cstdint>
 
-// 14 bytes
 #pragma pack(push, 1)
+// 14 bytes
 struct	bmp_file_header
 {
 	uint16_t	type;		// The header field used to identify the BMP and DIB file is 0x42 0x4D in hexadecimal, same as BM in ASCII.
 	uint32_t	size;		// The size of the BMP file in bytes.
 	uint16_t	reserved_1;	// Reserved; actual value depends on the application that creates the image, if created manually can be 0
 	uint16_t	reserved_2;	// Reserved; actual value depends on the application that creates the image, if created manually can be 0
-	uint32_t	offbits;	// The offset, i.e. starting address, of the byte where the bitmap image data (pixel array) can be found.
+	uint32_t	offbits;	// The offset, i.e. starting address, of the byte where the bitmap image data (pixel array) can be found.  };
 };
 
 // 40 bytes
@@ -30,5 +30,7 @@ struct bmp_info_header
 	uint32_t	color_number_important;	// the number of important colors used, or 0 when every color is important; generally ignored
 };
 #pragma pack(pop)
+
+int	bmp_serializer();
 
 #endif
