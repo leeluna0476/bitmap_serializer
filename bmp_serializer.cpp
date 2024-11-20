@@ -3,19 +3,22 @@
 #include <iostream>
 #include <fstream>
 
+#define BITS_BASIC 8
+#define BITS_HIGH 16
+
 int	bmp_serializer()
 {
 	struct bmp_file_header	file_header;
 	struct bmp_info_header	info_header;
 
-// INFO HEADER 채우기
+/////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct bmp_info_header);
 	// width, height user decision
 	info_header.width = 1920;
 	info_header.height = 1080;
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
-	info_header.bits_per_pixel = 8;
+	info_header.bits_per_pixel = BITS_BASIC;
 	// BI_RGB = 0. no compression.
 	info_header.compression = 0;
 	// resolution = 미터당 픽셀 밀집도. 기본값 = 0.
@@ -27,7 +30,7 @@ int	bmp_serializer()
 
 	// 색상 개수 * 4. 바이트 단위.
 	uint32_t	color_table_size = info_header.color_number << 2;
-// FILE HEADER 채우기
+/////FILE//////HEADER///////////////////////////////////
 	file_header.type = 0x4D42;
 	// file header size + info header size + palette size + pixel data
 	// 각 픽셀 크기는 bits_per_pixel에 따름, 픽셀 개수는 너비와 동, 패딩 사이즈 = (4 - (pixel % 4)) % 4
@@ -57,7 +60,7 @@ int	bmp_serializer()
 						  + sizeof(struct bmp_info_header) \
 						  + color_table_size;
 
-/////COLOR//////TABLE//////////////////////////////////////////////////////////////////////////////////////
+/////COLOR//////TABLE///////////////////////////////////
 
 	uint8_t*	color_table = 0;
 	if (info_header.color_number > 0)
@@ -84,14 +87,16 @@ int	bmp_serializer()
 		}
 	}
 
+/////PIXEL//////DATA////////////////////////////////////
+
+	// 비트 깊이가 8 이하일 때는 배열의 요소 개수를 반으로 줄이고, 값을 할당할 때 두 개의 픽셀값을 한번에 할당.
+	// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
 	uint16_t*	pixel_data = 0;
 	uint32_t	pixel_data_size = padded_matrix_size;
 	uint32_t	pixel_data_row = info_header.width;
 	uint32_t	pixel_data_padded_row = padded_row_size;
 	try
 	{
-		// 비트 깊이가 8 이하일 때는 배열의 요소 개수를 반으로 줄이고, 값을 할당할 때 두 개의 픽셀값을 한번에 할당.
-		// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
 		if (color_table_size != 0)
 		{
 			pixel_data_size >>= 1;
@@ -123,6 +128,8 @@ int	bmp_serializer()
 		std::cout << "exception" << std::endl;
 		return 0;
 	}
+
+/////GENERATE///////IMAGE///////////////////////////////
 
 	std::ofstream	outfile("test.bmp", std::ios::binary);
 	if (outfile.is_open() == 0)
