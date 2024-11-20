@@ -3,6 +3,9 @@
 
 # include <cstdint>
 
+#define BITS_BASIC 8
+#define BITS_HIGH 16
+
 #pragma pack(push, 1)
 // 14 bytes
 struct	bmp_file_header

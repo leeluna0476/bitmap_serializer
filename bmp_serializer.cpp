@@ -3,9 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-#define BITS_BASIC 8
-#define BITS_HIGH 16
-
 int	bmp_serializer()
 {
 	struct bmp_file_header	file_header;
