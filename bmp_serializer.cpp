@@ -26,7 +26,7 @@ int	bmp_serializer()
 	info_header.color_number_important = 0;
 
 	// 색상 개수 * 4. 바이트 단위.
-	uint32_t	color_table_size = info_header.color_number << 2;
+	uint32_t	palette_size = info_header.color_number << 2;
 /////FILE//////HEADER///////////////////////////////////
 	file_header.type = 0x4D42;
 	// file header size + info header size + palette size + pixel data
@@ -46,7 +46,7 @@ int	bmp_serializer()
 	file_header.size = \
 					   sizeof(struct bmp_file_header) \
 					   + sizeof(struct bmp_info_header) \
-					   + color_table_size \
+					   + palette_size \
 					   + padded_matrix_size;
 
 	file_header.reserved_1 = 0;
@@ -54,26 +54,26 @@ int	bmp_serializer()
 	file_header.offbits = \
 						  sizeof(struct bmp_file_header) \
 						  + sizeof(struct bmp_info_header) \
-						  + color_table_size;
+						  + palette_size;
 
 /////COLOR//////TABLE///////////////////////////////////
 
-	uint8_t*	color_table = 0;
+	uint8_t*	palette = 0;
 	if (info_header.color_number > 0)
 	{
 		try
 		{
-			color_table = new uint8_t[color_table_size];
+			palette = new uint8_t[palette_size];
 			// gray table
 			uint8_t	gap = 255 / (info_header.color_number - 1);
 			for (uint32_t i = 0; i < info_header.color_number; i++)
 			{
 				uint32_t	index = i << 2;
 				uint8_t		gray = i * gap;
-				color_table[index] = gray;		// blue
-				color_table[index + 1] = gray;	// green
-				color_table[index + 2] = gray;	// red
-				color_table[index + 3] = 0x0;	// reserved
+				palette[index] = gray;		// blue
+				palette[index + 1] = gray;	// green
+				palette[index + 2] = gray;	// red
+				palette[index + 3] = 0x0;	// reserved
 			}
 		}
 		catch (const std::exception& e)
@@ -93,7 +93,7 @@ int	bmp_serializer()
 	uint32_t	pixel_data_padded_row = padded_row_size;
 	try
 	{
-		if (color_table_size != 0)
+		if (palette_size != 0)
 		{
 			pixel_data_size >>= 1;
 			pixel_data_row >>= 1;
@@ -120,7 +120,7 @@ int	bmp_serializer()
 	}
 	catch (const std::exception& e)
 	{
-		delete[] color_table;
+		delete[] palette;
 		std::cerr << "exception" << std::endl;
 		return 0;
 	}
@@ -131,7 +131,7 @@ int	bmp_serializer()
 	if (outfile.is_open() == 0)
 	{
 		std::cerr << "Cannot open file" << std::endl;
-		delete[] color_table;
+		delete[] palette;
 		delete[] pixel_data;
 		return 0;
 	}
@@ -145,7 +145,7 @@ int	bmp_serializer()
 	// write palette if needed
 	if (info_header.color_number != 0)
 	{
-		outfile.write(reinterpret_cast<const char*>(color_table), color_table_size);
+		outfile.write(reinterpret_cast<const char*>(palette), palette_size);
 	}
 
 	// write pixel data
@@ -157,7 +157,7 @@ int	bmp_serializer()
 
 	outfile.close();
 
-	delete[] color_table;
+	delete[] palette;
 	delete[] pixel_data;
 
 	return 1;
