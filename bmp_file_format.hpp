@@ -3,7 +3,7 @@
 
 # include <cstdint>
 
-#define BITS_BASIC 8
+#define BITS_DEFAULT 8
 #define BITS_HIGH 16
 
 #pragma pack(push, 1)

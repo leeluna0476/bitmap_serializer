@@ -15,7 +15,7 @@ int	bmp_serializer()
 	info_header.height = 1080;
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
-	info_header.bits_per_pixel = BITS_BASIC;
+	info_header.bits_per_pixel = BITS_DEFAULT;
 	// BI_RGB = 0. no compression.
 	info_header.compression = 0;
 	// resolution = 미터당 픽셀 밀집도. 기본값 = 0.
