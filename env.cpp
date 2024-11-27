@@ -2,6 +2,16 @@
 #include <exception>
 #include <cstdlib>
 
+struct user	get_user_config()
+{
+	struct user	user_config;
+
+	//
+	//
+
+	return user_config;
+}
+
 uint8_t*	generate_palette(enum plt_type type, uint32_t size, uint32_t color_number)
 {
 	uint8_t*	palette = NULL;

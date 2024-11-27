@@ -1,7 +1,8 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
-# include <cstdint>
+#include "env.hpp"
+//# include <cstdint>
 
 #define BITS_DEFAULT 8
 #define BITS_HIGH 16
@@ -34,6 +35,6 @@ struct	bmp_info_header
 };
 #pragma pack(pop)
 
-int	bmp_serializer();
+int	bmp_serializer(struct user user_config);
 
 #endif

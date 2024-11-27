@@ -1,10 +1,9 @@
 #include "bmp_file_format.hpp"
-#include "env.hpp"
 #include <exception>
 #include <iostream>
 #include <fstream>
 
-int	bmp_serializer()
+int	bmp_serializer(struct user user_config)
 {
 	struct bmp_file_header	file_header;
 	struct bmp_info_header	info_header;
@@ -12,8 +11,8 @@ int	bmp_serializer()
 /////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct bmp_info_header);
 	// width, height user decision
-	info_header.width = 1920;
-	info_header.height = 1080;
+	info_header.width = user_config.width;
+	info_header.height = user_config.height;
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
 	info_header.bits_per_pixel = BITS_DEFAULT;
@@ -63,7 +62,7 @@ int	bmp_serializer()
 	if (info_header.color_number > 0)
 	{
 		// palette type 도 추후에 변수로 받는다.
-		if ((palette = generate_palette(RGB, palette_size, info_header.color_number)) == NULL)
+		if ((palette = generate_palette(user_config.palette_type, palette_size, info_header.color_number)) == NULL)
 		{
 			std::cerr << "exception" << std::endl;
 			return 0;
