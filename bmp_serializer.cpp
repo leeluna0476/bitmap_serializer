@@ -1,4 +1,5 @@
 #include "bmp_file_format.hpp"
+#include "env.hpp"
 #include <exception>
 #include <iostream>
 #include <fstream>
@@ -58,25 +59,11 @@ int	bmp_serializer()
 
 /////COLOR//////TABLE///////////////////////////////////
 
-	uint8_t*	palette = 0;
+	uint8_t*	palette = NULL;
 	if (info_header.color_number > 0)
 	{
-		try
-		{
-			palette = new uint8_t[palette_size];
-			// gray table
-			uint8_t	gap = 255 / (info_header.color_number - 1);
-			for (uint32_t i = 0; i < info_header.color_number; i++)
-			{
-				uint32_t	index = i << 2;
-				uint8_t		gray = i * gap;
-				palette[index] = gray;		// blue
-				palette[index + 1] = gray;	// green
-				palette[index + 2] = gray;	// red
-				palette[index + 3] = 0x0;	// reserved
-			}
-		}
-		catch (const std::exception& e)
+		// palette type 도 추후에 변수로 받는다.
+		if ((palette = generate_palette(RGB, palette_size, info_header.color_number)) == NULL)
 		{
 			std::cerr << "exception" << std::endl;
 			return 0;
@@ -91,27 +78,28 @@ int	bmp_serializer()
 	uint32_t	pixel_data_size = padded_matrix_size;
 	uint32_t	pixel_data_row = info_header.width;
 	uint32_t	pixel_data_padded_row = padded_row_size;
+
+	// issue 16bit
 	try
 	{
-		if (palette_size != 0)
+		if (palette_size > 0)
 		{
 			pixel_data_size >>= 1;
 			pixel_data_row >>= 1;
 			pixel_data_padded_row >>= 1;
 		}
+
 		pixel_data = new uint16_t[pixel_data_size];
+
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
 			uint32_t	line_gap = j * pixel_data_padded_row;
 			uint32_t	i = 0;
+
 			for ( ; i < pixel_data_row; i++)
 			{
-				// 더미 데이터 할당. 실제 값을 할당할 때는 리틀 엔디언을 고려해야 한다.
-				// a, b 순으로 저장하고 싶다면
-				// pixel_data[line_gap + i] = (b << 8) | a;
-				uint8_t	data = i * 255 / info_header.width;
-				pixel_data[line_gap + i] = data | (data << 8);
 			}
+
 			for ( ; i < pixel_data_padded_row; i++)
 			{
 				pixel_data[line_gap + i] = 0;

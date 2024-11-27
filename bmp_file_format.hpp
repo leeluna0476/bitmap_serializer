@@ -18,7 +18,7 @@ struct	bmp_file_header
 };
 
 // 40 bytes
-struct bmp_info_header
+struct	bmp_info_header
 {
 	uint32_t	size;					// the size of this header, in bytes (40)
 	uint32_t	width;					// the bitmap width in pixels (signed integer)
