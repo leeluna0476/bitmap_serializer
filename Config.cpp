@@ -55,23 +55,27 @@ void	Config::clearPixel()
 	initScreen();
 }
 
+int	Config::checkEscape(char* cptr)
+{
+	int	i = 0;
+	for (; i < 2; i++)
+	{
+		std::cin.read(cptr, 1);
+		if (*cptr != "\033["[i])
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
 // 0 <= ti < real_width
 // 0 <= tj < real_height
 void	Config::getPixel()
 {
 	char	c;
-	int i = 0;
-	for (; i < 2; i++)
-	{
-		std::cin.read(&c, 1);
-		if (c != "\033["[i])
-		{
-			break;
-		}
-	}
-
-	if (i == 2) // move cursor if escape
+	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
 		if (c == 'A' && tj > 0)
@@ -101,6 +105,10 @@ void	Config::getPixel()
 		{
 			clearPixel();
 		}
+		else if (c == '\n') // 입력 끝?
+		{
+			finishDrawing();
+		}
 		else if ((c == '1' || c == '2' || c == '3') && ti < real_width)
 		{
 			real_pixel_data[tj][ti] = c - '0';
@@ -116,6 +124,92 @@ void	Config::getPixel()
 			std::cout << "\033[D" << c << "\033[D";
 		}
 	}
+}
+
+// display: box = 1, erase = 0
+// option: yes = 1, no = 0
+void	Config::displayOption(const int display, const int option)
+{
+	const int	tab = real_width + 6;
+
+	switch (display)
+	{
+		case 1:
+			std::cout \
+				<< "\033[8;"  << tab << "H┌────────────────────────┐\n" \
+				<< "\033[9;"  << tab << "H│     Finish Drawing     │\n" \
+				<< "\033[10;" << tab << "H│                        │\n" \
+				<< "\033[11;" << tab << "H│      [yes]   [no]      │\n" \
+				<< "\033[12;" << tab << "H└────────────────────────┘";
+
+			switch (option)
+			{
+				case 1:
+					std::cout << "\033[11;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
+					break;
+				case 0:
+					std::cout << "\033[11;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		case 0:
+			std::cout \
+				<< "\033[8;"  << tab << "H                          \n" \
+				<< "\033[9;"  << tab << "H                          \n" \
+				<< "\033[10;" << tab << "H                          \n" \
+				<< "\033[11;" << tab << "H                          \n" \
+				<< "\033[12;" << tab << "H                          ";
+			break;
+		default:
+			break;
+	}
+}
+
+void	Config::finishDrawing()
+{
+	// 커서 숨기기
+	std::cout << "\033[?25l";
+	displayOption(1, 1);
+	int		option = 1;
+	char	c;
+	for (;;)
+	{
+		if (checkEscape(&c) == 1)
+		{
+			std::cin.read(&c, 1);
+			if (c == 'C') // no
+			{
+				option = 0;
+				displayOption(1, 0);
+			}
+			else if (c == 'D') // yes
+			{
+				option = 1;
+				displayOption(1, 1);
+			}
+		}
+		else if (c == '\n')
+		{
+			switch (option)
+			{
+				case 1: // yes
+					break;
+				case 0: // no
+					displayOption(0, 0);
+					goto RECOVER_CURSOR;
+				default:
+					break;
+			}
+		}
+		usleep(10000);
+	}
+
+RECOVER_CURSOR:
+	std::cout << "\033[" << tj + 2 << ";" << ti + 2 << "H";
+	// 커서 보이기
+	std::cout << "\033[?25h";
 }
 
 int	Config::getSize()
