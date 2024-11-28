@@ -45,9 +45,9 @@ class	Config
 		void	setRawMode(const bool enable);
 		void	clearPixel();
 		int		checkEscape(char* cptr);
-		void	getPixel();
+		int		getPixel();
 		void	displayOption(const int display, const int option);
-		void	finishDrawing();
+		int		finishDrawing();
 	public:
 		// Orthodox Canonical Class Form
 		Config();

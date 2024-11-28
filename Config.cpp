@@ -72,9 +72,10 @@ int	Config::checkEscape(char* cptr)
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
 // 0 <= ti < real_width
 // 0 <= tj < real_height
-void	Config::getPixel()
+int	Config::getPixel()
 {
 	char	c;
+	int		ret = 1;
 	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
@@ -107,7 +108,7 @@ void	Config::getPixel()
 		}
 		else if (c == '\n') // 입력 끝?
 		{
-			finishDrawing();
+			ret = !finishDrawing();
 		}
 		else if ((c == '1' || c == '2' || c == '3') && ti < real_width)
 		{
@@ -124,6 +125,7 @@ void	Config::getPixel()
 			std::cout << "\033[D" << c << "\033[D";
 		}
 	}
+	return ret;
 }
 
 // display: box = 1, erase = 0
@@ -167,7 +169,7 @@ void	Config::displayOption(const int display, const int option)
 	}
 }
 
-void	Config::finishDrawing()
+int	Config::finishDrawing()
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
@@ -192,24 +194,16 @@ void	Config::finishDrawing()
 		}
 		else if (c == '\n')
 		{
-			switch (option)
-			{
-				case 1: // yes
-					break;
-				case 0: // no
-					displayOption(0, 0);
-					goto RECOVER_CURSOR;
-				default:
-					break;
-			}
+			displayOption(0, 0);
+			break;
 		}
 		usleep(10000);
 	}
 
-RECOVER_CURSOR:
 	std::cout << "\033[" << tj + 2 << ";" << ti + 2 << "H";
 	// 커서 보이기
 	std::cout << "\033[?25h";
+	return option;
 }
 
 int	Config::getSize()
@@ -284,8 +278,12 @@ void	Config::draw()
 
 	for(;;)
 	{
-		getPixel();
+		if (getPixel() == 0)
+		{
+			break;
+		}
 		// CPU 부하 방지.
 		usleep(10000);
 	}
+	std::cout << CLEAR_SCREEN << std::flush;
 }
