@@ -24,6 +24,7 @@ Config::~Config()
 {
 };
 
+// 프로세스 종료 시 원상태로 복원. false
 void	Config::setRawMode(const bool enable)
 {
 	static struct termios oldt, newt;

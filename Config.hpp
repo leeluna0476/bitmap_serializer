@@ -47,7 +47,7 @@ class	Config
 		~Config();
 
 		// clear screen, set tui box
-		int	initScreen();
+		int		initScreen();
 		void	draw();
 };
 
