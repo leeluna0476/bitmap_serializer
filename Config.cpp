@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 // Orthodox Caninical Class Form
-Config::Config() : ti(1), tj(1)
+Config::Config() : ti(0), tj(0)
 {
 };
 
@@ -43,33 +43,35 @@ void	Config::setRawMode(const bool enable)
 	}
 }
 
+// 0 <= ti <= real_width
+// 0 <= tj <= real_height
 void	Config::moveCursor(const char c)
 {
 	switch (c)
 	{
 		case 'A':
-			if (tj > 1)
+			if (tj > 0)
 			{
 				std::cout << CURSOR_UP;
 				--tj;
 			}
 			break;
 		case 'B':
-			if (tj < real_height)
+			if (tj < real_height - 1)
 			{
 				std::cout << CURSOR_DOWN;
 				++tj;
 			}
 			break;
 		case 'C':
-			if (ti < real_width)
+			if (ti < real_width - 1)
 			{
 				std::cout << CURSOR_RIGHT;
 				++ti;
 			}
 			break;
 		case 'D':
-			if (ti > 1)
+			if (ti > 0)
 			{
 				std::cout << CURSOR_LEFT;
 				--ti;
