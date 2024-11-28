@@ -82,6 +82,8 @@ void	Config::moveCursor(const char c)
 	}
 }
 
+// 박스 크기 입력받고 박스 띄우기.
+// 안내문 띄우기.
 int	Config::initScreen()
 {
 	std::string	user_input;
@@ -114,6 +116,12 @@ int	Config::initScreen()
 		std::cout << "║" << std::string(real_width, ' ') << "║\n";
 	}
 	std::cout << "╚" << oss.str() << "╝";
+
+	// 안내사항
+	std::cout << LEFT_TOP << "\033[" << real_width + 5 << "C" \
+		<< "[ USAGE ]\n" << "\033[" << real_width + 6 << "C" \
+		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << real_width + 6 << "C" \
+		<< "2. Enter the color by { 1, 2, 3 }.\n";
 	std::cout << LEFT_TOP << std::flush;
 
 	setRawMode(true);
@@ -122,6 +130,7 @@ int	Config::initScreen()
 }
 
 // 일단 커서 이동만 구현해둠.
+// 지정된 문자 외에는 무시.
 void	Config::draw()
 {
 	int i;
