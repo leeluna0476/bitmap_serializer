@@ -31,8 +31,9 @@ class	Config
 		// background color
 		uint8_t			bgcolor;
 
-		int			ti;
-		int			tj;
+		// tui drawing board coordinate
+		int	ti;
+		int	tj;
 
 		// Orthodox Canonical Class Form
 		Config(const Config& _other);
