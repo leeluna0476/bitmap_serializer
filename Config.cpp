@@ -171,7 +171,6 @@ void	Config::initScreen()
 	setRawMode(true);
 }
 
-// 일단 커서 이동만 구현해둠.
 // 지정된 문자 외에는 무시.
 void	Config::draw()
 {
