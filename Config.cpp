@@ -43,44 +43,6 @@ void	Config::setRawMode(const bool enable)
 	}
 }
 
-// 0 <= ti <= real_width
-// 0 <= tj <= real_height
-void	Config::moveCursor(const char c)
-{
-	if (c == 'A')
-	{
-		if (tj > 0)
-		{
-			std::cout << CURSOR_UP;
-			--tj;
-		}
-	}
-	else if (c == 'B')
-	{
-		if (tj < real_height - 1)
-		{
-			std::cout << CURSOR_DOWN;
-			++tj;
-		}
-	}
-	else if (c == 'C')
-	{
-		if (ti < real_width - 1)
-		{
-			std::cout << CURSOR_RIGHT;
-			++ti;
-		}
-	}
-	else if (c == 'D')
-	{
-		if (ti > 0)
-		{
-			std::cout << CURSOR_LEFT;
-			--ti;
-		}
-	}
-}
-
 void	Config::clearPixel()
 {
 	for (int j = 0; j < real_height; j++)
@@ -94,25 +56,65 @@ void	Config::clearPixel()
 }
 
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
-void	Config::getPixel(const char c)
+// 0 <= ti < real_width
+// 0 <= tj < real_height
+void	Config::getPixel()
 {
-	if (c == 'C')
+	char	c;
+	int i = 0;
+	for (; i < 2; i++)
 	{
-		clearPixel();
+		std::cin.read(&c, 1);
+		if (c != "\033["[i])
+		{
+			break;
+		}
 	}
-	else if ((c == '1' || c == '2' || c == '3') && ti < real_width)
+
+	if (i == 2) // move cursor if escape
 	{
-		real_pixel_data[tj][ti] = c - '0';
+		std::cin.read(&c, 1);
+		if (c == 'A' && tj > 0)
+		{
+			std::cout << CURSOR_UP;
+			--tj;
+		}
+		else if (c == 'B' && tj < real_height - 1)
+		{
+			std::cout << CURSOR_DOWN;
+			++tj;
+		}
+		else if (c == 'C' && ti < real_width - 1)
+		{
+			std::cout << CURSOR_RIGHT;
+			++ti;
+		}
+		else if (c == 'D' && ti > 0)
+		{
+			std::cout << CURSOR_LEFT;
+			--ti;
+		}
+	}
+	else // draw pixel or others
+	{
+		if (c == 'C')
+		{
+			clearPixel();
+		}
+		else if ((c == '1' || c == '2' || c == '3') && ti < real_width)
+		{
+			real_pixel_data[tj][ti] = c - '0';
 // 배열에 제대로 저장되고 있는지 테스트하기 위한 코드.
-//		std::cout << real_pixel_data[tj][ti];
-		std::cout << c;
-		ti++;
-	}
-	else if (c == 127 && (ti > 0 && ti <= real_width))
-	{
-		std::cout << "\033[D" << c << "\033[D";
-		--ti;
-		real_pixel_data[tj][ti] = 0;
+//			std::cout << real_pixel_data[tj][ti];
+			ti++;
+			std::cout << c;
+		}
+		else if (c == 127 && (ti > 0 && ti <= real_width))
+		{
+			--ti;
+			real_pixel_data[tj][ti] = 0;
+			std::cout << "\033[D" << c << "\033[D";
+		}
 	}
 }
 
@@ -154,7 +156,7 @@ void	Config::initScreen()
 
 	for (int i = 0; i < real_height; i++)
 	{
-		std::cout << "║" << std::string(real_width, ' ') << "║\n";
+		std::cout << "║\033[" << real_width << "C║\n";
 	}
 	std::cout << "╚" << oss.str() << "╝";
 
@@ -187,28 +189,9 @@ void	Config::draw()
 		// exception 어디서 잡을지 고민...
 	}
 
-	int i;
 	for(;;)
 	{
-		char	c;
-		i = 0;
-		for (; i < 2; i++)
-		{
-			std::cin.read(&c, 1);
-			if (c != "\033["[i])
-			{
-				break;
-			}
-		}
-		if (i == 2)
-		{
-			std::cin.read(&c, 1);
-			moveCursor(c);
-		}
-		else
-		{
-			getPixel(c);
-		}
+		getPixel();
 		// CPU 부하 방지.
 		usleep(10000);
 	}

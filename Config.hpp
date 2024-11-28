@@ -43,9 +43,8 @@ class	Config
 		void	operator=(const Config& _other);
 
 		void	setRawMode(const bool enable);
-		void	moveCursor(const char c);
 		void	clearPixel();
-		void	getPixel(const char c);
+		void	getPixel();
 	public:
 		// Orthodox Canonical Class Form
 		Config();
