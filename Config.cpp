@@ -111,7 +111,7 @@ int	Config::initScreen()
 	{
 		std::cout << "║" << std::string(real_width, ' ') << "║\n";
 	}
-	std::cout << "╚" << oss.str() << "╝" << std::endl;
+	std::cout << "╚" << oss.str() << "╝";
 	std::cout << LEFT_TOP << std::flush;
 
 	setRawMode(true);
