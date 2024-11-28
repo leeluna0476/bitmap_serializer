@@ -35,19 +35,25 @@ class	Config
 		int	ti;
 		int	tj;
 
+		// map
+		int**	real_pixel_data;
+
 		// Orthodox Canonical Class Form
 		Config(const Config& _other);
 		void	operator=(const Config& _other);
 
 		void	setRawMode(const bool enable);
 		void	moveCursor(const char c);
+		void	clearPixel();
+		void	getPixel(const char c);
 	public:
 		// Orthodox Canonical Class Form
 		Config();
 		~Config();
 
 		// clear screen, set tui box
-		int		initScreen();
+		int		getSize();
+		void	initScreen();
 		void	draw();
 };
 
