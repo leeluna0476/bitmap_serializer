@@ -1,6 +1,6 @@
 .DEFAULT_GOAL=all
 
-NAME=drawing_board.a
+NAME=libdrawingboard.a
 CXX=c++
 CXXFLAGS=-Wall -Wextra -Werror --std=c++98 -Wpedantic
 CPPFLAGS=-MMD -MP -MF $(DEPS_DIR)/$*.d
@@ -12,6 +12,7 @@ RM=rm -fr
 SRCS=\
 	 bmp_serializer.cpp \
 	 env.cpp \
+	 Config.cpp \
 
 
 OBJS_DIR=.objs

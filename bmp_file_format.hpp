@@ -1,6 +1,7 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
+#include "Config.hpp"
 #include "env.hpp"
 //# include <cstdint>
 
@@ -35,6 +36,6 @@ struct	bmp_info_header
 };
 #pragma pack(pop)
 
-int	bmp_serializer(struct user user_config);
+int	bmp_serializer(const Config& config);
 
 #endif

@@ -23,17 +23,17 @@ class	Config
 		uint32_t	real_width;
 		uint32_t	real_height;
 		// revised from real_*
-		uint32_t	pseudo_width;
-		uint32_t	pseudo_height;
+//		uint32_t	pseudo_width;
+//		uint32_t	pseudo_height;
 
 		// palette type: GRAY, RGB
 		enum plt_type	palette_type;
 		// background color
-		uint8_t			bgcolor;
+//		uint8_t			bgcolor;
 
 		// tui drawing board coordinate
-		int	ti;
-		int	tj;
+		uint32_t	ti;
+		uint32_t	tj;
 
 		// map
 		int**	real_pixel_data;
@@ -52,6 +52,12 @@ class	Config
 		// Orthodox Canonical Class Form
 		Config();
 		~Config();
+
+		uint32_t	getRealWidth() const;
+		uint32_t	getRealHeight() const;
+		const int**	getRealPixelData() const;
+
+		enum plt_type	getPaletteType() const;
 
 		// clear screen, set tui box
 		int		getSize();

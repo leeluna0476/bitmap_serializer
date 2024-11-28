@@ -8,21 +8,25 @@
 // Orthodox Caninical Class Form
 Config::Config()
 {
-};
+}
 
 
 Config::Config(const Config& _other)
 {
-};
+	// never
+	std::cout << _other.palette_type;
+}
 
 
 void	Config::operator=(const Config& _other)
 {
-};
+	// never
+	std::cout << _other.palette_type;
+}
 
 Config::~Config()
 {
-};
+}
 
 // 프로세스 종료 시 원상태로 복원. false
 void	Config::setRawMode(const bool enable)
@@ -45,9 +49,9 @@ void	Config::setRawMode(const bool enable)
 
 void	Config::clearPixel()
 {
-	for (int j = 0; j < real_height; j++)
+	for (uint32_t j = 0; j < real_height; j++)
 	{
-		for (int i = 0; i < real_width; i++)
+		for (uint32_t i = 0; i < real_width; i++)
 		{
 			real_pixel_data[j][i] = 0;
 		}
@@ -206,6 +210,26 @@ int	Config::finishDrawing()
 	return option;
 }
 
+uint32_t	Config::getRealWidth() const
+{
+	return real_width;
+}
+
+uint32_t	Config::getRealHeight() const
+{
+	return real_height;
+}
+
+const int**	Config::getRealPixelData() const
+{
+	return const_cast<const int**>(real_pixel_data);
+}
+
+enum plt_type	Config::getPaletteType() const
+{
+	return palette_type;
+}
+
 int	Config::getSize()
 {
 	std::string	user_input;
@@ -235,14 +259,14 @@ void	Config::initScreen()
 	std::cout << CLEAR_SCREEN << std::flush;
 
 	std::ostringstream	oss;
-	for (int i = 0; i < real_width; i++)
+	for (uint32_t i = 0; i < real_width; i++)
 	{
 		// 특수문자여서 string 못 씀
 		oss << "═";
 	}
 	std::cout << "╔" << oss.str() << "╗\n";
 
-	for (int i = 0; i < real_height; i++)
+	for (uint32_t i = 0; i < real_height; i++)
 	{
 		std::cout << "║\033[" << real_width << "C║\n";
 	}
@@ -265,7 +289,7 @@ void	Config::draw()
 	try
 	{
 		real_pixel_data = new int*[real_height];
-		for (int i = 0; i < real_height; i++)
+		for (uint32_t i = 0; i < real_height; i++)
 		{
 			real_pixel_data[i] = new int[real_width];
 		}

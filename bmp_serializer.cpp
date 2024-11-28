@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 
-int	bmp_serializer(struct user user_config)
+int	bmp_serializer(const Config& config)
 {
 	struct bmp_file_header	file_header;
 	struct bmp_info_header	info_header;
@@ -11,8 +11,8 @@ int	bmp_serializer(struct user user_config)
 /////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct bmp_info_header);
 	// width, height user decision
-	info_header.width = user_config.width;
-	info_header.height = user_config.height;
+	info_header.width = config.getRealWidth();
+	info_header.height = config.getRealHeight();
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
 	info_header.bits_per_pixel = BITS_DEFAULT;
@@ -36,11 +36,11 @@ int	bmp_serializer(struct user user_config)
 	// 픽셀 하나가 몇 바이트인지.
 	uint16_t	pixel_size = (info_header.bits_per_pixel + 7) >> 3;
 	// 행 하나에 할당되는 바이트 수.
-	uint32_t	real_row_size = info_header.width * pixel_size;
+	uint32_t	pseudo_row_size = info_header.width * pixel_size;
 	// 각 행을 4의 배수로 패딩.
-	uint32_t	padding = (4 - (real_row_size % 4)) % 4;
+	uint32_t	padding = (4 - (pseudo_row_size % 4)) % 4;
 	// 패딩 처리한 행의 바이트 수.
-	uint32_t	padded_row_size = real_row_size + padding;
+	uint32_t	padded_row_size = pseudo_row_size + padding;
 	// 패딩 처리한 행 * 높이.
 	uint32_t	padded_matrix_size = info_header.height * padded_row_size;
 	file_header.size = \
@@ -62,7 +62,7 @@ int	bmp_serializer(struct user user_config)
 	if (info_header.color_number > 0)
 	{
 		// palette type 도 추후에 변수로 받는다.
-		if ((palette = generate_palette(user_config.palette_type, palette_size, info_header.color_number)) == NULL)
+		if ((palette = generate_palette(RGB, palette_size, info_header.color_number)) == NULL)
 		{
 			std::cerr << "exception" << std::endl;
 			return 0;
@@ -89,6 +89,7 @@ int	bmp_serializer(struct user user_config)
 		}
 
 		pixel_data = new uint16_t[pixel_data_size];
+		const int**	real_pixel_data = config.getRealPixelData();
 
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
@@ -97,6 +98,7 @@ int	bmp_serializer(struct user user_config)
 
 			for ( ; i < pixel_data_row; i++)
 			{
+				pixel_data[line_gap + i] = (real_pixel_data[j][i << 1] << 8) | (real_pixel_data[j][(i << 1) + 1]);
 			}
 
 			for ( ; i < pixel_data_padded_row; i++)
