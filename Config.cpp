@@ -97,7 +97,7 @@ void	Config::getPixel()
 	}
 	else // draw pixel or others
 	{
-		if (c == 'C')
+		if (c == 'L')
 		{
 			clearPixel();
 		}
@@ -165,7 +165,7 @@ void	Config::initScreen()
 		<< "[ USAGE ]\n" << "\033[" << real_width + 6 << "C" \
 		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << real_width + 6 << "C" \
 		<< "2. Enter the color by { 1, 2, 3 }.\n" << "\033[" << real_width + 6 << "C" \
-		<< "3. Enter 'C' to clear the screen\n";
+		<< "3. Enter 'L' to clear the screen.\n";
 	std::cout << LEFT_TOP << std::flush;
 
 	setRawMode(true);
