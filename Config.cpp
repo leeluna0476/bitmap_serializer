@@ -122,10 +122,11 @@ int	Config::initScreen()
 // 일단 커서 이동만 구현해둠.
 void	Config::draw()
 {
+	int i;
 	for(;;)
 	{
 		char	seq[3];
-		int i = 0;
+		i = 0;
 		for (; i < 2; i++)
 		{
 			std::cin.read(seq + i, 1);
