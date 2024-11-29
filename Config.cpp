@@ -220,9 +220,9 @@ uint32_t	Config::getRealHeight() const
 	return real_height;
 }
 
-const int**	Config::getRealPixelData() const
+const uint8_t**	Config::getRealPixelData() const
 {
-	return const_cast<const int**>(real_pixel_data);
+	return const_cast<const uint8_t**>(real_pixel_data);
 }
 
 enum plt_type	Config::getPaletteType() const
@@ -288,10 +288,10 @@ void	Config::draw()
 {
 	try
 	{
-		real_pixel_data = new int*[real_height];
+		real_pixel_data = new uint8_t*[real_height];
 		for (uint32_t i = 0; i < real_height; i++)
 		{
-			real_pixel_data[i] = new int[real_width];
+			real_pixel_data[i] = new uint8_t[real_width];
 		}
 	}
 	catch (const std::exception& e)

@@ -71,25 +71,18 @@ int	bmp_serializer(const Config& config)
 
 /////PIXEL//////DATA////////////////////////////////////
 
-	// 비트 깊이가 8 이하일 때는 배열의 요소 개수를 반으로 줄이고, 값을 할당할 때 두 개의 픽셀값을 한번에 할당.
-	// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
-	uint16_t*	pixel_data = 0;
+//	// 비트 깊이가 8 이하일 때는 배열의 요소 개수를 반으로 줄이고, 값을 할당할 때 두 개의 픽셀값을 한번에 할당.
+//	// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
+//	++ 복잡하다 그냥 8비트로 하자. 어차피 색상도 제한할 거고... 굳이 16비트 픽셀을 지원할 이유가 없다.
+	uint8_t*	pixel_data = 0;
 	uint32_t	pixel_data_size = padded_matrix_size;
 	uint32_t	pixel_data_row = info_header.width;
 	uint32_t	pixel_data_padded_row = padded_row_size;
 
-	// issue 16bit
 	try
 	{
-		if (palette_size > 0)
-		{
-			pixel_data_size >>= 1;
-			pixel_data_row >>= 1;
-			pixel_data_padded_row >>= 1;
-		}
-
-		pixel_data = new uint16_t[pixel_data_size];
-		const int**	real_pixel_data = config.getRealPixelData();
+		pixel_data = new uint8_t[pixel_data_size];
+		const uint8_t**	real_pixel_data = config.getRealPixelData();
 
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
@@ -98,7 +91,7 @@ int	bmp_serializer(const Config& config)
 
 			for ( ; i < pixel_data_row; i++)
 			{
-				pixel_data[line_gap + i] = (real_pixel_data[j][i << 1] << 8) | (real_pixel_data[j][(i << 1) + 1]);
+				pixel_data[line_gap + i] = real_pixel_data[j][i];
 			}
 
 			for ( ; i < pixel_data_padded_row; i++)

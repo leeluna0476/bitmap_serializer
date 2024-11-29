@@ -36,7 +36,7 @@ class	Config
 		uint32_t	tj;
 
 		// map
-		int**	real_pixel_data;
+		uint8_t**	real_pixel_data;
 
 		// Orthodox Canonical Class Form
 		Config(const Config& _other);
@@ -55,7 +55,7 @@ class	Config
 
 		uint32_t	getRealWidth() const;
 		uint32_t	getRealHeight() const;
-		const int**	getRealPixelData() const;
+		const uint8_t**	getRealPixelData() const;
 
 		enum plt_type	getPaletteType() const;
 
