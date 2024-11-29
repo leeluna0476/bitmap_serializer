@@ -1,7 +1,7 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
-#define BITS_DEFAULT 8
+# define BITS_DEFAULT 8
 
 #pragma pack(push, 1)
 // 14 bytes
