@@ -2,6 +2,7 @@
 # define CONFIG_HPP
 
 # include <cstdint>
+# include <string>
 
 # define CLEAR_SCREEN "\033[2J\033[H"
 # define LEFT_TOP "\033[H\033[B\033[C"
@@ -39,6 +40,8 @@ class	Interface
 		uint32_t	terminal_width;
 		uint32_t	terminal_height;
 
+		std::string	filename;
+
 		// palette type: GRAY, RGB
 		enum plt_type	palette_type;
 		uint8_t			bgcolor;
@@ -67,6 +70,8 @@ class	Interface
 
 		uint32_t		getRealWidth() const;
 		uint32_t		getRealHeight() const;
+
+		const std::string&	getFilename() const;
 
 		uint32_t		getTerminalWidth() const;
 		uint32_t		getTerminalHeight() const;

@@ -153,7 +153,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 /////GENERATE///////IMAGE///////////////////////////////
 
-	std::ofstream	outfile("test.bmp", std::ios::binary);
+	std::ofstream	outfile(user_data.getFilename(), std::ios::binary);
 	if (outfile.is_open() == 0)
 	{
 		std::cerr << "Cannot open file" << std::endl;

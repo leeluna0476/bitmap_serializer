@@ -147,19 +147,19 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 	{
 		case 0:
 			std::cout \
-				<< "\033[3;" << "H┌────────────────────────┐\n" \
-				<< "\033[4;" << "H│     Select bgcolor     │\n" \
-				<< "\033[5;" << "H│                        │\n" \
-				<< "\033[6;" << "H│    [white]  [black]    │\n" \
-				<< "\033[7;" << "H└────────────────────────┘";
+				<< "\033[5;" << "H┌────────────────────────┐\n" \
+				<< "\033[6;" << "H│     Select bgcolor     │\n" \
+				<< "\033[7;" << "H│                        │\n" \
+				<< "\033[8;" << "H│    [white]  [black]    │\n" \
+				<< "\033[9;" << "H└────────────────────────┘";
 
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[6;" << "H│    \033[44m[white]\033[0m  [black]    │\n";
+					std::cout << "\033[8;" << "H│    \033[44m[white]\033[0m  [black]    │\n";
 					break;
 				case RIGHT:
-					std::cout << "\033[6;" << "H│    [white]  \033[44m[black]\033[0m    │\n";
+					std::cout << "\033[8;" << "H│    [white]  \033[44m[black]\033[0m    │\n";
 					break;
 				default:
 					break;
@@ -250,6 +250,11 @@ uint32_t	Interface::getRealHeight() const
 	return real_height;
 }
 
+const std::string&	Interface::getFilename() const
+{
+	return filename;
+}
+
 uint32_t	Interface::getTerminalWidth() const
 {
 	return real_width;
@@ -303,6 +308,11 @@ uint32_t	Interface::setConfig()
 		std::cerr << "Width and height of the image must be at least 10." << std::endl;
 		return 0;
 	}
+
+	std::cout << "[Enter filename]: ";
+	std::cout << "\n(output: <filename>.bmp)\033[A\033[6D";
+	getline(std::cin, filename);
+	filename += ".bmp";
 
 	setRawMode(true);
 
@@ -369,5 +379,5 @@ void	Interface::draw()
 		// CPU 부하 방지.
 		usleep(10000);
 	}
-	std::cout << CLEAR_SCREEN << std::flush;
+//	std::cout << CLEAR_SCREEN << std::flush;
 }
