@@ -4,6 +4,10 @@
 # include <cstdint>
 # include "Config.hpp"
 
+# define COLOR_1 0xB4
+# define COLOR_2 0x12
+# define COLOR_3 0x5
+
 struct	user
 {
 	uint32_t		width;

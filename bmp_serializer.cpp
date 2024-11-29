@@ -84,6 +84,7 @@ int	bmp_serializer(const Config& config)
 		pixel_data = new uint8_t[pixel_data_size];
 		const uint8_t**	real_pixel_data = config.getRealPixelData();
 
+		const uint8_t	color[4] = { 0x00, COLOR_1, COLOR_2, COLOR_3 };
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
 			uint32_t	line_gap = j * pixel_data_padded_row;
@@ -91,8 +92,11 @@ int	bmp_serializer(const Config& config)
 
 			for ( ; i < pixel_data_row; i++)
 			{
-				pixel_data[line_gap + i] = real_pixel_data[j][i];
+				int cidx = real_pixel_data[j][i];
+				std::cout << cidx << " ";
+				pixel_data[line_gap + i] = color[cidx];
 			}
+			std::cout << std::endl;
 
 			for ( ; i < pixel_data_padded_row; i++)
 			{

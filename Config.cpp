@@ -291,7 +291,7 @@ void	Config::draw()
 		real_pixel_data = new uint8_t*[real_height];
 		for (uint32_t i = 0; i < real_height; i++)
 		{
-			real_pixel_data[i] = new uint8_t[real_width];
+			real_pixel_data[i] = new uint8_t[real_width]();
 		}
 	}
 	catch (const std::exception& e)
