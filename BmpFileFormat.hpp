@@ -1,6 +1,7 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
+#include "Interface.hpp"
 #include "env.hpp"
 //# include <cstdint>
 
@@ -9,7 +10,7 @@
 
 #pragma pack(push, 1)
 // 14 bytes
-struct	bmp_file_header
+struct	BmpFileHeader
 {
 	uint16_t	type;		// The header field used to identify the BMP and DIB file is 0x42 0x4D in hexadecimal, same as BM in ASCII.
 	uint32_t	size;		// The size of the BMP file in bytes.
@@ -19,7 +20,7 @@ struct	bmp_file_header
 };
 
 // 40 bytes
-struct	bmp_info_header
+struct	BmpInfoHeader
 {
 	uint32_t	size;					// the size of this header, in bytes (40)
 	uint32_t	width;					// the bitmap width in pixels (signed integer)
@@ -35,6 +36,6 @@ struct	bmp_info_header
 };
 #pragma pack(pop)
 
-int	bmp_serializer(struct user user_config);
+int	bmp_serializer(const Interface& Interface);
 
 #endif
