@@ -119,7 +119,7 @@ uint32_t	Interface::getPixel()
 			terminal_pixel_data[tj][ti] = c - '0';
 // 배열에 제대로 저장되고 있는지 테스트하기 위한 코드.
 //			std::cout << terminal_pixel_data[tj][ti];
-			ti++;
+			++ti;
 			std::cout << c;
 		}
 		else if (c == 127 && (ti > 0 && ti <= terminal_width))
