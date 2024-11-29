@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "Interface.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -6,30 +6,30 @@
 #include <unistd.h>
 
 // Orthodox Canonical Class Form
-Config::Config()
+Interface::Interface()
 {
 }
 
 
-Config::Config(const Config& _other)
-{
-	// never
-	std::cout << _other.palette_type;
-}
-
-
-void	Config::operator=(const Config& _other)
+Interface::Interface(const Interface& _other)
 {
 	// never
 	std::cout << _other.palette_type;
 }
 
-Config::~Config()
+
+void	Interface::operator=(const Interface& _other)
+{
+	// never
+	std::cout << _other.palette_type;
+}
+
+Interface::~Interface()
 {
 }
 
 // 프로세스 종료 시 원상태로 복원. false
-void	Config::setRawMode(const bool enable)
+void	Interface::setRawMode(const bool enable)
 {
 	static struct termios oldt, newt;
 	if (enable)
@@ -47,19 +47,19 @@ void	Config::setRawMode(const bool enable)
 	}
 }
 
-void	Config::clearPixel()
+void	Interface::clearPixel()
 {
-	for (uint32_t j = 0; j < real_height; j++)
+	for (uint32_t j = 0; j < terminal_height; j++)
 	{
-		for (uint32_t i = 0; i < real_width; i++)
+		for (uint32_t i = 0; i < terminal_width; i++)
 		{
-			real_pixel_data[j][i] = 0;
+			terminal_pixel_data[j][i] = 0;
 		}
 	}
 	initScreen();
 }
 
-uint32_t	Config::checkEscape(char* cptr)
+uint32_t	Interface::checkEscape(char* cptr)
 {
 	uint32_t	i = 0;
 	for (; i < 2; i++)
@@ -74,9 +74,9 @@ uint32_t	Config::checkEscape(char* cptr)
 }
 
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
-// 0 <= ti < real_width
-// 0 <= tj < real_height
-uint32_t	Config::getPixel()
+// 0 <= ti < terminal_width
+// 0 <= tj < terminal_height
+uint32_t	Interface::getPixel()
 {
 	char		c;
 	uint32_t	ret = 0;
@@ -88,12 +88,12 @@ uint32_t	Config::getPixel()
 			std::cout << CURSOR_UP;
 			--tj;
 		}
-		else if (c == 'B' && tj < real_height - 1)
+		else if (c == 'B' && tj < terminal_height - 1)
 		{
 			std::cout << CURSOR_DOWN;
 			++tj;
 		}
-		else if (c == 'C' && ti < real_width - 1)
+		else if (c == 'C' && ti < terminal_width - 1)
 		{
 			std::cout << CURSOR_RIGHT;
 			++ti;
@@ -114,18 +114,18 @@ uint32_t	Config::getPixel()
 		{
 			ret = chooseOption(FINISH_DRAWING);
 		}
-		else if ((c == '1' || c == '2' || c == '3' || c == '4') && ti < real_width)
+		else if ((c == '1' || c == '2' || c == '3' || c == '4') && ti < terminal_width)
 		{
-			real_pixel_data[tj][ti] = c - '0';
+			terminal_pixel_data[tj][ti] = c - '0';
 // 배열에 제대로 저장되고 있는지 테스트하기 위한 코드.
-//			std::cout << real_pixel_data[tj][ti];
+//			std::cout << terminal_pixel_data[tj][ti];
 			ti++;
 			std::cout << c;
 		}
-		else if (c == 127 && (ti > 0 && ti <= real_width))
+		else if (c == 127 && (ti > 0 && ti <= terminal_width))
 		{
 			--ti;
-			real_pixel_data[tj][ti] = 0;
+			terminal_pixel_data[tj][ti] = 0;
 			std::cout << "\033[D" << c << "\033[D";
 		}
 	}
@@ -139,9 +139,9 @@ uint32_t	Config::getPixel()
 // option
 // 0 -> black, no
 // 1 -> white, yes
-void	Config::displayOption(enum optionDisplayMode mode, enum button option)
+void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 {
-	const uint32_t	tab = real_width + 6;
+	const uint32_t	tab = terminal_width + 6;
 
 	switch (mode)
 	{
@@ -198,7 +198,7 @@ void	Config::displayOption(enum optionDisplayMode mode, enum button option)
 	}
 }
 
-uint32_t	Config::chooseOption(enum optionDisplayMode mode)
+uint32_t	Interface::chooseOption(enum optionDisplayMode mode)
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
@@ -240,32 +240,44 @@ uint32_t	Config::chooseOption(enum optionDisplayMode mode)
 	return option;
 }
 
-uint32_t	Config::getRealWidth() const
+uint32_t	Interface::getRealWidth() const
 {
 	return real_width;
 }
 
-uint32_t	Config::getRealHeight() const
+uint32_t	Interface::getRealHeight() const
 {
 	return real_height;
 }
 
-const uint8_t**	Config::getRealPixelData() const
+uint32_t	Interface::getTerminalWidth() const
 {
-	return const_cast<const uint8_t**>(real_pixel_data);
+	return real_width;
 }
 
-enum plt_type	Config::getPaletteType() const
+uint32_t	Interface::getTerminalHeight() const
+{
+	return real_height;
+}
+
+const uint8_t**	Interface::getTerminalPixelData() const
+{
+	return const_cast<const uint8_t**>(terminal_pixel_data);
+}
+
+enum plt_type	Interface::getPaletteType() const
 {
 	return palette_type;
 }
 
-uint8_t	Config::getBgcolor() const
+uint8_t	Interface::getBgcolor() const
 {
 	return bgcolor;
 }
 
-uint32_t	Config::setConfig()
+// pixel 10의 배수로 반올림.
+// 혼란을 줄 수 있으니 픽셀 입력 최소 10 이상
+uint32_t	Interface::setConfig()
 {
 	std::cout << CLEAR_SCREEN << std::flush;
 
@@ -279,8 +291,16 @@ uint32_t	Config::setConfig()
 	getline(std::cin, user_input);
 	std::istringstream(user_input) >> real_height;
 
-	if (real_width == 0 || real_height == 0)
+	// 10자리로 반올림하고 10으로 나눈다.
+	terminal_width = (real_width % 10) >= 5 ? (real_width + 10) / 10 : real_width / 10;
+	terminal_height = (real_height % 10) >= 5 ? (real_height + 10) / 10 : real_height / 10;
+
+	real_width = terminal_width * 10;
+	real_height = terminal_height * 10;
+
+	if (terminal_width == 0 || terminal_height == 0)
 	{
+		std::cerr << "Width and height of the image must be at least 10." << std::endl;
 		return 0;
 	}
 
@@ -293,45 +313,45 @@ uint32_t	Config::setConfig()
 
 // 박스 크기 입력받고 박스 띄우기.
 // 안내문 띄우기.
-void	Config::initScreen()
+void	Interface::initScreen()
 {
 	ti = 0;
 	tj = 0;
 	std::cout << CLEAR_SCREEN << std::flush;
 
 	std::ostringstream	oss;
-	for (uint32_t i = 0; i < real_width; i++)
+	for (uint32_t i = 0; i < terminal_width; i++)
 	{
 		// 특수문자여서 string 못 씀
 		oss << "═";
 	}
 	std::cout << "╔" << oss.str() << "╗\n";
 
-	for (uint32_t i = 0; i < real_height; i++)
+	for (uint32_t i = 0; i < terminal_height; i++)
 	{
-		std::cout << "║\033[" << real_width << "C║\n";
+		std::cout << "║\033[" << terminal_width << "C║\n";
 	}
 	std::cout << "╚" << oss.str() << "╝";
 
 	// 안내사항
-	std::cout << LEFT_TOP << "\033[" << real_width + 5 << "C" \
-		<< "[ USAGE ]\n" << "\033[" << real_width + 6 << "C" \
-		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << real_width + 6 << "C" \
-		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << real_width + 6 << "C" \
-		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << real_width + 6 << "C" \
+	std::cout << LEFT_TOP << "\033[" << terminal_width + 5 << "C" \
+		<< "[ USAGE ]\n" << "\033[" << terminal_width + 6 << "C" \
+		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << terminal_width + 6 << "C" \
+		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << terminal_width + 6 << "C" \
+		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << terminal_width + 6 << "C" \
 		<< "3. Enter 'L' to clear the screen.\n";
 	std::cout << LEFT_TOP << std::flush;
 }
 
 // 지정된 문자 외에는 무시.
-void	Config::draw()
+void	Interface::draw()
 {
 	try
 	{
-		real_pixel_data = new uint8_t*[real_height];
-		for (uint32_t i = 0; i < real_height; i++)
+		terminal_pixel_data = new uint8_t*[terminal_height];
+		for (uint32_t i = 0; i < terminal_height; i++)
 		{
-			real_pixel_data[i] = new uint8_t[real_width]();
+			terminal_pixel_data[i] = new uint8_t[terminal_width]();
 		}
 	}
 	catch (const std::exception& e)

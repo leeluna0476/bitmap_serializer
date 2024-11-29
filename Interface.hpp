@@ -29,15 +29,15 @@ enum	optionDisplayMode
 	CLEAR
 };
 
-class	Config
+class	Interface
 {
 	private:
 	// USER DEFINED
 		uint32_t	real_width;
 		uint32_t	real_height;
 		// revised from real_*
-//		uint32_t	pseudo_width;
-//		uint32_t	pseudo_height;
+		uint32_t	terminal_width;
+		uint32_t	terminal_height;
 
 		// palette type: GRAY, RGB
 		enum plt_type	palette_type;
@@ -48,11 +48,11 @@ class	Config
 		uint32_t	tj;
 
 		// map
-		uint8_t**	real_pixel_data;
+		uint8_t**	terminal_pixel_data;
 
 		// Orthodox Canonical Class Form
-		Config(const Config& _other);
-		void	operator=(const Config& _other);
+		Interface(const Interface& _other);
+		void	operator=(const Interface& _other);
 
 		void		setRawMode(bool enable);
 		void		clearPixel();
@@ -62,12 +62,15 @@ class	Config
 		uint32_t	chooseOption(enum optionDisplayMode mode);
 	public:
 		// Orthodox Canonical Class Form
-		Config();
-		~Config();
+		Interface();
+		~Interface();
 
 		uint32_t		getRealWidth() const;
 		uint32_t		getRealHeight() const;
-		const uint8_t**	getRealPixelData() const;
+
+		uint32_t		getTerminalWidth() const;
+		uint32_t		getTerminalHeight() const;
+		const uint8_t**	getTerminalPixelData() const;
 
 		enum plt_type	getPaletteType() const;
 		uint8_t			getBgcolor() const;

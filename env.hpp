@@ -2,7 +2,7 @@
 # define ENV_HPP
 
 # include <cstdint>
-# include "Config.hpp"
+# include "Interface.hpp"
 
 # define COLOR_1 0xB4
 # define COLOR_2 0x12

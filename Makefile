@@ -10,9 +10,9 @@ ARFLAGS=rc
 RM=rm -fr
 
 SRCS=\
-	 bmp_serializer.cpp \
+	 Serializer.cpp \
 	 env.cpp \
-	 Config.cpp \
+	 Interface.cpp \
 
 
 OBJS_DIR=.objs

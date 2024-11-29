@@ -1,18 +1,42 @@
 #include "BmpFileFormat.hpp"
+#include "Serializer.hpp"
+#include "env.hpp"
 #include <exception>
 #include <iostream>
 #include <fstream>
 
-int	bmp_serializer(const Config& config)
+// OCCF
+Serializer::Serializer()
+{
+}
+
+// later change cast
+Serializer::Serializer(const Serializer& other)
+{
+	(void)other;
+}
+
+void	Serializer::operator=(const Serializer& other)
+{
+	(void)other;
+}
+
+Serializer::~Serializer()
+{
+}
+
+// uintptr_t의 정체?
+uintptr_t	Serializer::serialize(Data* ptr)
 {
 	struct BmpFileHeader	file_header;
 	struct BmpInfoHeader	info_header;
+	const Interface&	user_data = ptr->user_data;
 
 /////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct BmpInfoHeader);
 	// width, height user decision
-	info_header.width = config.getRealWidth();
-	info_header.height = config.getRealHeight();
+	info_header.width = user_data.getRealWidth();
+	info_header.height = user_data.getRealHeight();
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
 	info_header.bits_per_pixel = BITS_DEFAULT;
@@ -75,31 +99,50 @@ int	bmp_serializer(const Config& config)
 //	// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
 //	++ 복잡하다 그냥 8비트로 하자. 어차피 색상도 제한할 거고... 굳이 16비트 픽셀을 지원할 이유가 없다.
 	uint8_t*	pixel_data = 0;
-	uint32_t	pixel_data_size = padded_matrix_size;
-	uint32_t	pixel_data_row = info_header.width;
-	uint32_t	pixel_data_padded_row = padded_row_size;
+//	uint32_t	pixel_data_size = padded_matrix_size;
+//	uint32_t	pixel_data_row = info_header.width;
+//	uint32_t	pixel_data_padded_row = padded_row_size;
 
 	try
 	{
-		pixel_data = new uint8_t[pixel_data_size];
-		const uint8_t**	real_pixel_data = config.getRealPixelData();
+		pixel_data = new uint8_t[padded_matrix_size];
+		const uint8_t**	real_pixel_data = user_data.getTerminalPixelData();
 
-		const uint8_t	color[5] = { config.getBgcolor(), COLOR_1, COLOR_2, COLOR_3, ~(config.getBgcolor()) };
+//		uint32_t		terminal_width = user_data.getTerminalWidth();
+//		uint32_t		terminal_height = user_data.getTerminalHeight();
+		const uint8_t	color[5] = { user_data.getBgcolor(), COLOR_1, COLOR_2, COLOR_3, ~(ptr->user_data.getBgcolor()) };
+
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
-			uint32_t	line_gap = j * pixel_data_padded_row;
+			uint32_t	line_gap = j * padded_row_size;;
+			uint32_t	_j = j / 10;
 			uint32_t	i = 0;
-
-			for ( ; i < pixel_data_row; i++)
+			for ( ; i < info_header.width; i++)
 			{
-				pixel_data[line_gap + i] = color[real_pixel_data[j][i]];
+				pixel_data[line_gap + i] = color[real_pixel_data[_j][i / 10]];
 			}
 
-			for ( ; i < pixel_data_padded_row; i++)
+			for ( ; i < padded_row_size; i++)
 			{
 				pixel_data[line_gap + i] = 0;
 			}
 		}
+
+//		for (uint32_t j = 0; j < info_header.height; j++)
+//		{
+//			uint32_t	line_gap = j * pixel_data_padded_row;
+//			uint32_t	i = 0;
+//
+//			for ( ; i < pixel_data_row; i++)
+//			{
+//				pixel_data[line_gap + i] = color[real_pixel_data[j][i]];
+//			}
+//
+//			for ( ; i < pixel_data_padded_row; i++)
+//			{
+//				pixel_data[line_gap + i] = 0;
+//			}
+//		}
 	}
 	catch (const std::exception& e)
 	{
@@ -132,7 +175,7 @@ int	bmp_serializer(const Config& config)
 	}
 
 	// write pixel data
-	for (uint32_t i = pixel_data_size - pixel_data_padded_row; i > 0; i -= pixel_data_padded_row)
+	for (uint32_t i = padded_matrix_size - padded_row_size; i > 0; i -= padded_row_size)
 	{
 		outfile.write(reinterpret_cast<const char*>(&pixel_data[i]), padded_row_size);
 	}
@@ -143,5 +186,9 @@ int	bmp_serializer(const Config& config)
 	delete[] palette;
 	delete[] pixel_data;
 
-	return 1;
+	return reinterpret_cast<uintptr_t>(ptr);
 }
+
+//Data*	Serializer::deserialize(uintptr_t raw)
+//{
+//}
