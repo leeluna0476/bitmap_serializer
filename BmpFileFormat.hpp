@@ -1,12 +1,9 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
-#include "Interface.hpp"
 #include "env.hpp"
-//# include <cstdint>
 
 #define BITS_DEFAULT 8
-#define BITS_HIGH 16
 
 #pragma pack(push, 1)
 // 14 bytes
@@ -35,7 +32,5 @@ struct	BmpInfoHeader
 	uint32_t	color_number_important;	// the number of important colors used, or 0 when every color is important; generally ignored
 };
 #pragma pack(pop)
-
-int	bmp_serializer(const Interface& Interface);
 
 #endif
