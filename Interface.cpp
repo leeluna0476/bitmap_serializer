@@ -167,19 +167,19 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case 1:
 			std::cout \
-				<< "\033[8;"  << tab << "H┌────────────────────────┐\n" \
-				<< "\033[9;"  << tab << "H│     Finish Drawing     │\n" \
-				<< "\033[10;" << tab << "H│                        │\n" \
-				<< "\033[11;" << tab << "H│      [yes]   [no]      │\n" \
-				<< "\033[12;" << tab << "H└────────────────────────┘";
+				<< "\033[9;"  << tab << "H┌────────────────────────┐\n" \
+				<< "\033[10;" << tab << "H│     Finish Drawing     │\n" \
+				<< "\033[11;" << tab << "H│                        │\n" \
+				<< "\033[12;" << tab << "H│      [yes]   [no]      │\n" \
+				<< "\033[13;" << tab << "H└────────────────────────┘";
 
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[11;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
+					std::cout << "\033[12;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
 					break;
 				case RIGHT:
-					std::cout << "\033[11;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
+					std::cout << "\033[12;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
 					break;
 				default:
 					break;
@@ -187,11 +187,11 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case 2:
 			std::cout \
-				<< "\033[8;"  << tab << "H                          \n" \
 				<< "\033[9;"  << tab << "H                          \n" \
 				<< "\033[10;" << tab << "H                          \n" \
 				<< "\033[11;" << tab << "H                          \n" \
-				<< "\033[12;" << tab << "H                          ";
+				<< "\033[12;" << tab << "H                          \n" \
+				<< "\033[13;" << tab << "H                          ";
 			break;
 		default:
 			break;
@@ -349,7 +349,8 @@ void	Interface::initScreen()
 		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << terminal_width + 6 << "C" \
 		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << terminal_width + 6 << "C" \
 		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << terminal_width + 6 << "C" \
-		<< "3. Enter 'L' to clear the screen.\n";
+		<< "3. Press <backspace> to erase the pixel\n" << "\033[" << terminal_width + 6 << "C" \
+		<< "4. Enter 'L' to clear the screen.\n";
 	std::cout << LEFT_TOP << std::flush;
 }
 
