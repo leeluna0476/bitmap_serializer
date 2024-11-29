@@ -145,7 +145,7 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 
 	switch (mode)
 	{
-		case 0:
+		case BGCOLOR:
 			std::cout \
 				<< "\033[5;" << "H┌────────────────────────┐\n" \
 				<< "\033[6;" << "H│     Select bgcolor     │\n" \
@@ -165,7 +165,7 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 					break;
 			}
 			break;
-		case 1:
+		case FINISH_DRAWING:
 			std::cout \
 				<< "\033[9;"  << tab << "H┌────────────────────────┐\n" \
 				<< "\033[10;" << tab << "H│     Finish Drawing     │\n" \
@@ -185,7 +185,7 @@ void	Interface::displayOption(enum optionDisplayMode mode, enum button option)
 					break;
 			}
 			break;
-		case 2:
+		case CLEAR:
 			std::cout \
 				<< "\033[9;"  << tab << "H                          \n" \
 				<< "\033[10;" << tab << "H                          \n" \
