@@ -5,7 +5,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-// Orthodox Caninical Class Form
+// Orthodox Canonical Class Form
 Config::Config()
 {
 }
