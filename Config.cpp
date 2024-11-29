@@ -59,9 +59,9 @@ void	Config::clearPixel()
 	initScreen();
 }
 
-int	Config::checkEscape(char* cptr)
+uint32_t	Config::checkEscape(char* cptr)
 {
-	int	i = 0;
+	uint32_t	i = 0;
 	for (; i < 2; i++)
 	{
 		std::cin.read(cptr, 1);
@@ -76,10 +76,10 @@ int	Config::checkEscape(char* cptr)
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
 // 0 <= ti < real_width
 // 0 <= tj < real_height
-int	Config::getPixel()
+uint32_t	Config::getPixel()
 {
-	char	c;
-	int		ret = 1;
+	char		c;
+	uint32_t	ret = 0;
 	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
@@ -112,7 +112,7 @@ int	Config::getPixel()
 		}
 		else if (c == '\n') // 입력 끝?
 		{
-			ret = !finishDrawing();
+			ret = chooseOption(FINISH_DRAWING);
 		}
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && ti < real_width)
 		{
@@ -132,14 +132,39 @@ int	Config::getPixel()
 	return ret;
 }
 
-// display: box = 1, erase = 0
-// option: yes = 1, no = 0
-void	Config::displayOption(const int display, const int option)
+// mode
+// 0 -> choose bgcolor
+// 1 -> finish drawing yes or no
+//
+// option
+// 0 -> black, no
+// 1 -> white, yes
+void	Config::displayOption(enum optionDisplayMode mode, enum button option)
 {
-	const int	tab = real_width + 6;
+	const uint32_t	tab = real_width + 6;
 
-	switch (display)
+	switch (mode)
 	{
+		case 0:
+			std::cout \
+				<< "\033[3;" << "H┌────────────────────────┐\n" \
+				<< "\033[4;" << "H│     Select bgcolor     │\n" \
+				<< "\033[5;" << "H│                        │\n" \
+				<< "\033[6;" << "H│    [white]  [black]    │\n" \
+				<< "\033[7;" << "H└────────────────────────┘";
+
+			switch (option)
+			{
+				case LEFT:
+					std::cout << "\033[6;" << "H│    \033[44m[white]\033[0m  [black]    │\n";
+					break;
+				case RIGHT:
+					std::cout << "\033[6;" << "H│    [white]  \033[44m[black]\033[0m    │\n";
+					break;
+				default:
+					break;
+			}
+			break;
 		case 1:
 			std::cout \
 				<< "\033[8;"  << tab << "H┌────────────────────────┐\n" \
@@ -150,17 +175,17 @@ void	Config::displayOption(const int display, const int option)
 
 			switch (option)
 			{
-				case 1:
+				case LEFT:
 					std::cout << "\033[11;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
 					break;
-				case 0:
+				case RIGHT:
 					std::cout << "\033[11;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
 					break;
 				default:
 					break;
 			}
 			break;
-		case 0:
+		case 2:
 			std::cout \
 				<< "\033[8;"  << tab << "H                          \n" \
 				<< "\033[9;"  << tab << "H                          \n" \
@@ -173,40 +198,45 @@ void	Config::displayOption(const int display, const int option)
 	}
 }
 
-int	Config::finishDrawing()
+uint32_t	Config::chooseOption(enum optionDisplayMode mode)
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
-	displayOption(1, 1);
-	int		option = 1;
+	displayOption(mode, LEFT);
+	enum button	option = LEFT;
 	char	c;
 	for (;;)
 	{
 		if (checkEscape(&c) == 1)
 		{
 			std::cin.read(&c, 1);
-			if (c == 'C') // no
+			if (c == 'C') // black, no
 			{
-				option = 0;
-				displayOption(1, 0);
+				option = RIGHT;
+				displayOption(mode, RIGHT);
 			}
-			else if (c == 'D') // yes
+			else if (c == 'D') // white, yes
 			{
-				option = 1;
-				displayOption(1, 1);
+				option = LEFT;
+				displayOption(mode, LEFT);
 			}
 		}
 		else if (c == '\n')
 		{
-			displayOption(0, 0);
+			if (mode == FINISH_DRAWING)
+			{
+				displayOption(CLEAR, RIGHT);
+			}
 			break;
 		}
 		usleep(10000);
 	}
 
+	// 커서 위치 복원
 	std::cout << "\033[" << tj + 2 << ";" << ti + 2 << "H";
 	// 커서 보이기
 	std::cout << "\033[?25h";
+
 	return option;
 }
 
@@ -230,15 +260,22 @@ enum plt_type	Config::getPaletteType() const
 	return palette_type;
 }
 
-int	Config::getSize()
+uint8_t	Config::getBgcolor() const
 {
+	return bgcolor;
+}
+
+uint32_t	Config::setConfig()
+{
+	std::cout << CLEAR_SCREEN << std::flush;
+
 	std::string	user_input;
 	// get user input width
-	std::cout << "[Enter image width]: " << std::flush;
+	std::cout << "[Enter image width]: ";
 	getline(std::cin, user_input);
 	std::istringstream(user_input) >> real_width;
 	// get user input height
-	std::cout << "[Enter image height]: " << std::flush;
+	std::cout << "[Enter image height]: ";
 	getline(std::cin, user_input);
 	std::istringstream(user_input) >> real_height;
 
@@ -246,6 +283,10 @@ int	Config::getSize()
 	{
 		return 0;
 	}
+
+	setRawMode(true);
+
+	bgcolor = static_cast<int>(chooseOption(BGCOLOR)) * 0xFF;
 
 	return 1;
 }
@@ -280,8 +321,6 @@ void	Config::initScreen()
 		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << real_width + 6 << "C" \
 		<< "3. Enter 'L' to clear the screen.\n";
 	std::cout << LEFT_TOP << std::flush;
-
-	setRawMode(true);
 }
 
 // 지정된 문자 외에는 무시.
@@ -301,9 +340,9 @@ void	Config::draw()
 		// exception 어디서 잡을지 고민...
 	}
 
-	for(;;)
+	for (;;)
 	{
-		if (getPixel() == 0)
+		if (getPixel() == 1)
 		{
 			break;
 		}

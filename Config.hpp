@@ -16,6 +16,19 @@ enum	plt_type
 	RGB
 };
 
+enum	button
+{
+	RIGHT = 0,
+	LEFT
+};
+
+enum	optionDisplayMode
+{
+	BGCOLOR = 0,
+	FINISH_DRAWING,
+	CLEAR
+};
+
 class	Config
 {
 	private:
@@ -28,8 +41,7 @@ class	Config
 
 		// palette type: GRAY, RGB
 		enum plt_type	palette_type;
-		// background color
-//		uint8_t			bgcolor;
+		uint8_t			bgcolor;
 
 		// tui drawing board coordinate
 		uint32_t	ti;
@@ -42,27 +54,28 @@ class	Config
 		Config(const Config& _other);
 		void	operator=(const Config& _other);
 
-		void	setRawMode(const bool enable);
-		void	clearPixel();
-		int		checkEscape(char* cptr);
-		int		getPixel();
-		void	displayOption(const int display, const int option);
-		int		finishDrawing();
+		void		setRawMode(bool enable);
+		void		clearPixel();
+		uint32_t	checkEscape(char* cptr);
+		uint32_t	getPixel();
+		void		displayOption(enum optionDisplayMode mode, enum button option);
+		uint32_t	chooseOption(enum optionDisplayMode mode);
 	public:
 		// Orthodox Canonical Class Form
 		Config();
 		~Config();
 
-		uint32_t	getRealWidth() const;
-		uint32_t	getRealHeight() const;
+		uint32_t		getRealWidth() const;
+		uint32_t		getRealHeight() const;
 		const uint8_t**	getRealPixelData() const;
 
 		enum plt_type	getPaletteType() const;
+		uint8_t			getBgcolor() const;
 
 		// clear screen, set tui box
-		int		getSize();
-		void	initScreen();
-		void	draw();
+		uint32_t		setConfig();
+		void			initScreen();
+		void			draw();
 };
 
 #endif
