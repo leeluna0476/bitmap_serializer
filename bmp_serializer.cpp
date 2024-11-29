@@ -84,7 +84,7 @@ int	bmp_serializer(const Config& config)
 		pixel_data = new uint8_t[pixel_data_size];
 		const uint8_t**	real_pixel_data = config.getRealPixelData();
 
-		const uint8_t	color[4] = { 0x00, COLOR_1, COLOR_2, COLOR_3 };
+		const uint8_t	color[5] = { 0x00, COLOR_1, COLOR_2, COLOR_3, 0xFF };
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
 			uint32_t	line_gap = j * pixel_data_padded_row;

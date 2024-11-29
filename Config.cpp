@@ -114,7 +114,7 @@ int	Config::getPixel()
 		{
 			ret = !finishDrawing();
 		}
-		else if ((c == '1' || c == '2' || c == '3') && ti < real_width)
+		else if ((c == '1' || c == '2' || c == '3' || c == '4') && ti < real_width)
 		{
 			real_pixel_data[tj][ti] = c - '0';
 // 배열에 제대로 저장되고 있는지 테스트하기 위한 코드.
@@ -276,7 +276,8 @@ void	Config::initScreen()
 	std::cout << LEFT_TOP << "\033[" << real_width + 5 << "C" \
 		<< "[ USAGE ]\n" << "\033[" << real_width + 6 << "C" \
 		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << real_width + 6 << "C" \
-		<< "2. Enter the color by { 1, 2, 3 }.\n" << "\033[" << real_width + 6 << "C" \
+		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << real_width + 6 << "C" \
+		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << real_width + 6 << "C" \
 		<< "3. Enter 'L' to clear the screen.\n";
 	std::cout << LEFT_TOP << std::flush;
 
