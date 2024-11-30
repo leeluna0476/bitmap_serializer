@@ -1,6 +1,8 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
+# include <cstdint>
+
 # define BITS_DEFAULT 8
 
 #pragma pack(push, 1)
