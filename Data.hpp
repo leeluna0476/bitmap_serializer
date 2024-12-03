@@ -15,7 +15,7 @@
 # define COLOR_2 0x12
 # define COLOR_3 0x5
 
-enum	plt_type
+enum	paletteType
 {
 	GRAY,
 	RGB
@@ -36,21 +36,23 @@ enum	optionDisplayMode
 
 typedef struct _Data
 {
-	uint32_t		raw_width;
-	uint32_t		raw_height;
+	// image 기준.
+	uint32_t			raw_width;
+	uint32_t			raw_height;
 
-	uint32_t		terminal_width;
-	uint32_t		terminal_height;
+	// terminal 기준.
+	uint32_t			terminal_width;
+	uint32_t			terminal_height;
 
-	std::string		filename;
+	std::string			filename;
 
-	enum plt_type	palette_type;
-	uint8_t			bgcolor;
+	enum paletteType	palette_type;
+	uint8_t				bgcolor;
 
-	uint32_t		ti;
-	uint32_t		tj;
+	uint32_t			ti;
+	uint32_t			tj;
 
-	uint8_t**		terminal_pixel_data;
+	uint8_t**			terminal_pixel_data;
 } Data;
 
 #endif

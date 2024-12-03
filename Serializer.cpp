@@ -3,7 +3,6 @@
 #include <exception>
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
 #include <termios.h>
 #include <unistd.h>
@@ -48,7 +47,7 @@ void	Serializer::setRawMode(const bool enable)
 	}
 }
 
-uint8_t*	Serializer::generatePalette(enum plt_type type, uint32_t size, uint32_t color_number)
+uint8_t*	Serializer::generatePalette(enum paletteType type, uint32_t size, uint32_t color_number)
 {
 	uint8_t*	palette = NULL;
 

@@ -2,7 +2,6 @@
 # define SERIALIZER_HPP
 
 # include "Data.hpp"
-# include <cstdint>
 
 class	Serializer
 {
@@ -17,7 +16,7 @@ class	Serializer
 		static Data		data;
 
 		static void			setRawMode(bool enable);
-		static uint8_t*		generatePalette(enum plt_type type, uint32_t size, uint32_t color_number);
+		static uint8_t*		generatePalette(enum paletteType type, uint32_t size, uint32_t color_number);
 		static void			clearPixel();
 		static uint32_t		checkEscape(char* cptr);
 		static uint32_t		getPixel();

@@ -35,7 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
-libft.a
+bmp_serializer
 
 # Debug files
 *.dSYM/
