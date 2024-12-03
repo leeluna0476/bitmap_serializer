@@ -53,7 +53,7 @@ Mkfile.old
 dkms.conf
 
 # Test codes
-*main.c*
+# *main.c*
 *test.c*
 
 # output files
