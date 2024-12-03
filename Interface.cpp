@@ -240,14 +240,14 @@ uint32_t	Interface::chooseOption(enum optionDisplayMode mode)
 	return option;
 }
 
-uint32_t	Interface::getRealWidth() const
+uint32_t	Interface::getRawWidth() const
 {
-	return real_width;
+	return raw_width;
 }
 
-uint32_t	Interface::getRealHeight() const
+uint32_t	Interface::getRawHeight() const
 {
-	return real_height;
+	return raw_height;
 }
 
 const std::string&	Interface::getFilename() const
@@ -257,12 +257,12 @@ const std::string&	Interface::getFilename() const
 
 uint32_t	Interface::getTerminalWidth() const
 {
-	return real_width;
+	return terminal_width;
 }
 
 uint32_t	Interface::getTerminalHeight() const
 {
-	return real_height;
+	return terminal_height;
 }
 
 const uint8_t**	Interface::getTerminalPixelData() const
@@ -290,18 +290,18 @@ uint32_t	Interface::setConfig()
 	// get user input width
 	std::cout << "[Enter image width]: ";
 	getline(std::cin, user_input);
-	std::istringstream(user_input) >> real_width;
+	std::istringstream(user_input) >> raw_width;
 	// get user input height
 	std::cout << "[Enter image height]: ";
 	getline(std::cin, user_input);
-	std::istringstream(user_input) >> real_height;
+	std::istringstream(user_input) >> raw_height;
 
 	// 10자리로 반올림하고 10으로 나눈다.
-	terminal_width = (real_width % 10) >= 5 ? (real_width + 10) / 10 : real_width / 10;
-	terminal_height = (real_height % 10) >= 5 ? (real_height + 10) / 10 : real_height / 10;
+	terminal_width = (raw_width % 10) >= 5 ? (raw_width + 10) / 10 : raw_width / 10;
+	terminal_height = (raw_height % 10) >= 5 ? (raw_height + 10) / 10 : raw_height / 10;
 
-	real_width = terminal_width * 10;
-	real_height = terminal_height * 10;
+	raw_width = terminal_width * 10;
+	raw_height = terminal_height * 10;
 
 	if (terminal_width == 0 || terminal_height == 0)
 	{

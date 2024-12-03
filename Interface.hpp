@@ -34,9 +34,9 @@ class	Interface
 {
 	private:
 	// USER DEFINED
-		uint32_t	real_width;
-		uint32_t	real_height;
-		// revised from real_*
+		uint32_t	raw_width;
+		uint32_t	raw_height;
+		// revised from raw_*
 		uint32_t	terminal_width;
 		uint32_t	terminal_height;
 
@@ -68,8 +68,8 @@ class	Interface
 		Interface();
 		~Interface();
 
-		uint32_t		getRealWidth() const;
-		uint32_t		getRealHeight() const;
+		uint32_t		getRawWidth() const;
+		uint32_t		getRawHeight() const;
 
 		const std::string&	getFilename() const;
 

@@ -35,8 +35,8 @@ uintptr_t	Serializer::serialize(Data* ptr)
 /////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct BmpInfoHeader);
 	// width, height user decision
-	info_header.width = user_data.getRealWidth();
-	info_header.height = user_data.getRealHeight();
+	info_header.width = user_data.getRawWidth();
+	info_header.height = user_data.getRawHeight();
 	info_header.color_plane = 1;
 	// ildan heukbaek. user decision
 	info_header.bits_per_pixel = BITS_DEFAULT;
