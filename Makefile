@@ -1,19 +1,15 @@
 .DEFAULT_GOAL=all
 
-NAME=libdrawingboard.a
+NAME=bmp_serializer
 CXX=c++
-CXXFLAGS=-Wall -Wextra -Werror --std=c++98 -Wpedantic
+CXXFLAGS=-Wall -Wextra -Werror --std=c++98 -Wpedantic -fsanitize=address
 CPPFLAGS=-MMD -MP -MF $(DEPS_DIR)/$*.d
-AR=ar
-ARFLAGS=rc
 
 RM=rm -fr
 
 SRCS=\
 	 Serializer.cpp \
-	 env.cpp \
-	 Interface.cpp \
-
+	 main.cpp \
 
 OBJS_DIR=.objs
 OBJS=$(addprefix $(OBJS_DIR)/, $(SRCS:.cpp=.o))
@@ -29,7 +25,7 @@ endif
 all : $(NAME)
 
 $(NAME): $(OBJS)
-	$(AR) $(ARFLAGS) $@ $?
+	$(LINK.cpp) $(OUTPUT_OPTION) $(OBJS)
 
 $(OBJS_DIR)/%.o: %.cpp | $(OBJS_DIR) $(DEPS_DIR)
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
