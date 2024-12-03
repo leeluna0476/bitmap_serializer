@@ -47,7 +47,7 @@ void	Serializer::setRawMode(const bool enable)
 	}
 }
 
-uint8_t*	Serializer::generatePalette(enum paletteType type, uint32_t size, uint32_t color_number)
+uint8_t*	Serializer::generatePalette(uint32_t size, uint32_t color_number)
 {
 	uint8_t*	palette = NULL;
 
@@ -55,21 +55,21 @@ uint8_t*	Serializer::generatePalette(enum paletteType type, uint32_t size, uint3
 	{
 		palette = new uint8_t[size];
 
-		if (type == GRAY)
-		{
-			uint8_t	gap = 255 / (color_number - 1);
-			for (uint32_t i = 0; i < color_number; i++)
-			{
-				uint32_t	index = i << 2;
-				uint8_t		gray = i * gap;
-				palette[index] = gray;		// blue
-				palette[index + 1] = gray;	// green
-				palette[index + 2] = gray;	// red
-				palette[index + 3] = 0x0;	// reserved
-			}
-		}
-		else if (type == RGB)
-		{
+//		if (type == GRAY)
+//		{
+//			uint8_t	gap = 255 / (color_number - 1);
+//			for (uint32_t i = 0; i < color_number; i++)
+//			{
+//				uint32_t	index = i << 2;
+//				uint8_t		gray = i * gap;
+//				palette[index] = gray;		// blue
+//				palette[index + 1] = gray;	// green
+//				palette[index + 2] = gray;	// red
+//				palette[index + 3] = 0x0;	// reserved
+//			}
+//		}
+//		else if (type == RGB)
+//		{
 //			uint8_t	gap = 255 / (color_number - 1);
 			for (uint32_t i = 0; i < color_number; i++)
 			{
@@ -101,7 +101,7 @@ uint8_t*	Serializer::generatePalette(enum paletteType type, uint32_t size, uint3
 					palette[index + 3] = 0;         // Alpha 채널 (0)
 				}
 			}
-		}
+//		}
 	}
 	catch (const std::exception& e)
 	{
@@ -204,45 +204,45 @@ uint32_t	Serializer::getPixel()
 // 1 -> white, yes
 void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 {
-	const uint32_t	tab = data.terminal_width + 6;
+	const uint32_t	tab_horiz = data.terminal_width + 5;
 
 	switch (mode)
 	{
 		case BGCOLOR:
-			std::cout \
-				<< "\033[5;" << "H┌────────────────────────┐\n" \
-				<< "\033[6;" << "H│     Select bgcolor     │\n" \
-				<< "\033[7;" << "H│                        │\n" \
-				<< "\033[8;" << "H│    [black]  [white]    │\n" \
-				<< "\033[9;" << "H└────────────────────────┘";
+			std::cout << "\033[5;H" \
+				<< "┌────────────────────────┐\n" \
+				<< "│     Select bgcolor     │\n" \
+				<< "│                        │\n" \
+				<< "│    [black]  [white]    │\n" \
+				<< "└────────────────────────┘";
 
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[8;" << "H│    \033[44m[black]\033[0m  [white]    │\n";
+					std::cout << "\033[8;" << "H│    \033[44m[black]\033[0m  [white]    │";
 					break;
 				case RIGHT:
-					std::cout << "\033[8;" << "H│    [black]  \033[44m[white]\033[0m    │\n";
+					std::cout << "\033[8;" << "H│    [black]  \033[44m[white]\033[0m    │";
 					break;
 				default:
 					break;
 			}
 			break;
 		case PALETTE_TYPE:
-			std::cout \
-				<< "\033[11;" << "H┌────────────────────────┐\n" \
-				<< "\033[12;" << "H│     Select palette     │\n" \
-				<< "\033[13;" << "H│                        │\n" \
-				<< "\033[14;" << "H│     [GRAY]   [RGB]     │\n" \
-				<< "\033[15;" << "H└────────────────────────┘";
+			std::cout << "\033[10H" \
+				<< "┌────────────────────────┐\n" \
+				<< "│     Select palette     │\n" \
+				<< "│                        │\n" \
+				<< "│     [GRAY]   [RGB]     │\n" \
+				<< "└────────────────────────┘";
 
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[14;" << "H│     \033[44m[GRAY]\033[0m   [RGB]     │\n";
+					std::cout << "\033[13;" << "H│     \033[44m[GRAY]\033[0m   [RGB]     │";
 					break;
 				case RIGHT:
-					std::cout << "\033[14;" << "H│     [GRAY]   \033[44m[RGB]\033[0m     │\n";
+					std::cout << "\033[13;" << "H│     [GRAY]   \033[44m[RGB]\033[0m     │";
 					break;
 				default:
 					break;
@@ -250,18 +250,18 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case FINISH_DRAWING:
 			std::cout \
-				<< "\033[13;" << tab << "H┌────────────────────────┐\n" \
-				<< "\033[14;" << tab << "H│     Finish drawing     │\n" \
-				<< "\033[15;" << tab << "H│                        │\n" \
-				<< "\033[16;" << tab << "H│      [yes]   [no]      │\n" \
-				<< "\033[17;" << tab << "H└────────────────────────┘";
+				<< "\033[13;" << tab_horiz << "H┌────────────────────────┐" \
+				<< "\033[14;" << tab_horiz << "H│     Finish drawing     │" \
+				<< "\033[15;" << tab_horiz << "H│                        │" \
+				<< "\033[16;" << tab_horiz << "H│      [yes]   [no]      │" \
+				<< "\033[17;" << tab_horiz << "H└────────────────────────┘";
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[16;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
+					std::cout << "\033[16;" << tab_horiz << "H│      \033[44m[yes]\033[0m   [no]      │";
 					break;
 				case RIGHT:
-					std::cout << "\033[16;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
+					std::cout << "\033[16;" << tab_horiz << "H│      [yes]   \033[44m[no]\033[0m      │";
 					break;
 				default:
 					break;
@@ -269,11 +269,11 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case CLEAR:
 			std::cout \
-				<< "\033[13;" << tab << "H                          \n" \
-				<< "\033[14;" << tab << "H                          \n" \
-				<< "\033[15;" << tab << "H                          \n" \
-				<< "\033[16;" << tab << "H                          \n" \
-				<< "\033[17;" << tab << "H                          ";
+				<< "\033[13;" << tab_horiz << "H                          " \
+				<< "\033[14;" << tab_horiz << "H                          " \
+				<< "\033[15;" << tab_horiz << "H                          " \
+				<< "\033[16;" << tab_horiz << "H                          " \
+				<< "\033[17;" << tab_horiz << "H                          ";
 			break;
 		default:
 			break;
@@ -524,7 +524,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	if (info_header.color_number > 0)
 	{
 		// palette type 도 추후에 변수로 받는다.
-		if ((palette = generatePalette(RGB, palette_size, info_header.color_number)) == NULL)
+		if ((palette = generatePalette(palette_size, info_header.color_number)) == NULL)
 		{
 			std::cerr << "exception" << std::endl;
 			return 0;
