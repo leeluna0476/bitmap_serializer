@@ -17,19 +17,20 @@
 
 enum	paletteType
 {
-	GRAY,
+	GRAY = 0,
 	RGB
 };
 
 enum	button
 {
-	RIGHT = 0,
-	LEFT
+	LEFT = 0,
+	RIGHT
 };
 
 enum	optionDisplayMode
 {
 	BGCOLOR = 0,
+	PALETTE_TYPE,
 	FINISH_DRAWING,
 	CLEAR
 };
@@ -47,6 +48,7 @@ typedef struct _Data
 	std::string			filename;
 
 	enum paletteType	palette_type;
+	uint8_t				color_index[5];
 	uint8_t				bgcolor;
 
 	uint32_t			ti;

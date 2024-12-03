@@ -142,7 +142,7 @@ uint32_t	Serializer::checkEscape(char* cptr)
 uint32_t	Serializer::getPixel()
 {
 	char		c;
-	uint32_t	ret = 0;
+	uint32_t	ret = 1;
 	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
@@ -213,16 +213,36 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 				<< "\033[5;" << "H┌────────────────────────┐\n" \
 				<< "\033[6;" << "H│     Select bgcolor     │\n" \
 				<< "\033[7;" << "H│                        │\n" \
-				<< "\033[8;" << "H│    [white]  [black]    │\n" \
+				<< "\033[8;" << "H│    [black]  [white]    │\n" \
 				<< "\033[9;" << "H└────────────────────────┘";
 
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[8;" << "H│    \033[44m[white]\033[0m  [black]    │\n";
+					std::cout << "\033[8;" << "H│    \033[44m[black]\033[0m  [white]    │\n";
 					break;
 				case RIGHT:
-					std::cout << "\033[8;" << "H│    [white]  \033[44m[black]\033[0m    │\n";
+					std::cout << "\033[8;" << "H│    [black]  \033[44m[white]\033[0m    │\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		case PALETTE_TYPE:
+			std::cout \
+				<< "\033[11;" << "H┌────────────────────────┐\n" \
+				<< "\033[12;" << "H│     Select palette     │\n" \
+				<< "\033[13;" << "H│                        │\n" \
+				<< "\033[14;" << "H│     [GRAY]   [RGB]     │\n" \
+				<< "\033[15;" << "H└────────────────────────┘";
+
+			switch (option)
+			{
+				case LEFT:
+					std::cout << "\033[14;" << "H│     \033[44m[GRAY]\033[0m   [RGB]     │\n";
+					break;
+				case RIGHT:
+					std::cout << "\033[14;" << "H│     [GRAY]   \033[44m[RGB]\033[0m     │\n";
 					break;
 				default:
 					break;
@@ -230,19 +250,18 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case FINISH_DRAWING:
 			std::cout \
-				<< "\033[9;"  << tab << "H┌────────────────────────┐\n" \
-				<< "\033[10;" << tab << "H│     Finish Drawing     │\n" \
-				<< "\033[11;" << tab << "H│                        │\n" \
-				<< "\033[12;" << tab << "H│      [yes]   [no]      │\n" \
-				<< "\033[13;" << tab << "H└────────────────────────┘";
-
+				<< "\033[13;" << tab << "H┌────────────────────────┐\n" \
+				<< "\033[14;" << tab << "H│     Finish drawing     │\n" \
+				<< "\033[15;" << tab << "H│                        │\n" \
+				<< "\033[16;" << tab << "H│      [yes]   [no]      │\n" \
+				<< "\033[17;" << tab << "H└────────────────────────┘";
 			switch (option)
 			{
 				case LEFT:
-					std::cout << "\033[12;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
+					std::cout << "\033[16;" << tab << "H│      \033[44m[yes]\033[0m   [no]      │\n";
 					break;
 				case RIGHT:
-					std::cout << "\033[12;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
+					std::cout << "\033[16;" << tab << "H│      [yes]   \033[44m[no]\033[0m      │\n";
 					break;
 				default:
 					break;
@@ -250,11 +269,11 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 			break;
 		case CLEAR:
 			std::cout \
-				<< "\033[9;"  << tab << "H                          \n" \
-				<< "\033[10;" << tab << "H                          \n" \
-				<< "\033[11;" << tab << "H                          \n" \
-				<< "\033[12;" << tab << "H                          \n" \
-				<< "\033[13;" << tab << "H                          ";
+				<< "\033[13;" << tab << "H                          \n" \
+				<< "\033[14;" << tab << "H                          \n" \
+				<< "\033[15;" << tab << "H                          \n" \
+				<< "\033[16;" << tab << "H                          \n" \
+				<< "\033[17;" << tab << "H                          ";
 			break;
 		default:
 			break;
@@ -273,15 +292,10 @@ uint32_t	Serializer::chooseOption(enum optionDisplayMode mode)
 		if (checkEscape(&c) == 1)
 		{
 			std::cin.read(&c, 1);
-			if (c == 'C') // black, no
+			if (c == 'C' || c == 'D')
 			{
-				option = RIGHT;
-				displayOption(mode, RIGHT);
-			}
-			else if (c == 'D') // white, yes
-			{
-				option = LEFT;
-				displayOption(mode, LEFT);
+				option = static_cast<enum button>(!option);
+				displayOption(mode, option);
 			}
 		}
 		else if (c == '\n')
@@ -301,6 +315,25 @@ uint32_t	Serializer::chooseOption(enum optionDisplayMode mode)
 	std::cout << "\033[?25h";
 
 	return option;
+}
+
+void	Serializer::setColorIndex()
+{
+	data.color_index[0] = data.bgcolor;
+	switch (data.palette_type)
+	{
+		case GRAY:
+			data.color_index[1] = 245;
+			data.color_index[2] = 235;
+			data.color_index[3] = 225;
+			break;
+		case RGB:
+			data.color_index[1] = 180;
+			data.color_index[2] = 18;
+			data.color_index[3] = 5;
+			break;
+	}
+	data.color_index[4] = ~(data.bgcolor);
 }
 
 // pixel 10의 배수로 반올림.
@@ -340,6 +373,9 @@ uint32_t	Serializer::setConfig()
 	setRawMode(true);
 
 	data.bgcolor = static_cast<int>(chooseOption(BGCOLOR)) * 0xFF;
+	data.palette_type = static_cast<enum paletteType>(chooseOption(PALETTE_TYPE));
+
+	setColorIndex();
 
 	return 1;
 }
@@ -349,14 +385,17 @@ uint32_t	Serializer::setConfig()
 // bar 미리 초기화 해두기.
 void	Serializer::initScreen()
 {
+	const char*	palette_name[2] = { "GRAY", "RGB" };
+	const char*	background_name[2] = { "BLACK", "WHITE" };
+
 	data.ti = 0;
 	data.tj = 0;
+
 	std::cout << CLEAR_SCREEN << std::flush;
 
 	std::ostringstream	oss;
 	for (uint32_t i = 0; i < data.terminal_width; i++)
 	{
-		// 특수문자여서 string 못 씀
 		oss << "═";
 	}
 	std::cout << "╔" << oss.str() << "╗\n";
@@ -367,8 +406,14 @@ void	Serializer::initScreen()
 	}
 	std::cout << "╚" << oss.str() << "╝";
 
-	// 안내사항
+	// 현재 세팅
 	std::cout << LEFT_TOP << "\033[" << data.terminal_width + 5 << "C" \
+		<< "[ PROPERTIES ]\n\033["<< data.terminal_width + 6 << "C" \
+		<< "Palette: " << palette_name[data.palette_type] << "\n\033[" << data.terminal_width + 6 << "C" \
+		<< "Bgcolor: " << background_name[data.bgcolor / 0xFF] << "\n\n";
+
+	// 안내사항
+	std::cout << "\033[" << data.terminal_width + 6 << "C" \
 		<< "[ USAGE ]\n" << "\033[" << data.terminal_width + 6 << "C" \
 		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << data.terminal_width + 6 << "C" \
 		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << data.terminal_width + 6 << "C" \
@@ -397,7 +442,7 @@ void	Serializer::draw()
 
 	for (;;)
 	{
-		if (getPixel() == 1)
+		if (getPixel() == 0)
 		{
 			break;
 		}
@@ -499,9 +544,6 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	try
 	{
 		pixel_data = new uint8_t[padded_matrix_size];
-//		const uint8_t**	real_pixel_data = ptr->terminal_pixel_data;
-
-		const uint8_t	color[5] = { ptr->bgcolor, COLOR_1, COLOR_2, COLOR_3, ~(ptr->bgcolor) };
 
 		for (uint32_t j = 0; j < info_header.height; j++)
 		{
@@ -510,7 +552,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 			uint32_t	i = 0;
 			for ( ; i < info_header.width; i++)
 			{
-				pixel_data[line_gap + i] = color[ptr->terminal_pixel_data[_j][i / 10]];
+				pixel_data[line_gap + i] = ptr->color_index[ptr->terminal_pixel_data[_j][i / 10]];
 			}
 
 			for ( ; i < padded_row_size; i++)
@@ -518,22 +560,6 @@ uintptr_t	Serializer::serialize(Data* ptr)
 				pixel_data[line_gap + i] = 0;
 			}
 		}
-
-//		for (uint32_t j = 0; j < info_header.height; j++)
-//		{
-//			uint32_t	line_gap = j * pixel_data_padded_row;
-//			uint32_t	i = 0;
-//
-//			for ( ; i < pixel_data_row; i++)
-//			{
-//				pixel_data[line_gap + i] = color[real_pixel_data[j][i]];
-//			}
-//
-//			for ( ; i < pixel_data_padded_row; i++)
-//			{
-//				pixel_data[line_gap + i] = 0;
-//			}
-//		}
 	}
 	catch (const std::exception& e)
 	{
