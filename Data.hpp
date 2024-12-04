@@ -11,10 +11,6 @@
 # define CURSOR_RIGHT "\033[C"
 # define CURSOR_LEFT "\033[D"
 
-# define COLOR_1 0xB4
-# define COLOR_2 0x12
-# define COLOR_3 0x5
-
 enum	paletteType
 {
 	GRAY = 0,

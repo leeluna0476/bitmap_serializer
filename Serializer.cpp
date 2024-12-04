@@ -55,53 +55,31 @@ uint8_t*	Serializer::generatePalette(uint32_t size, uint32_t color_number)
 	{
 		palette = new uint8_t[size];
 
-//		if (type == GRAY)
-//		{
-//			uint8_t	gap = 255 / (color_number - 1);
-//			for (uint32_t i = 0; i < color_number; i++)
-//			{
-//				uint32_t	index = i << 2;
-//				uint8_t		gray = i * gap;
-//				palette[index] = gray;		// blue
-//				palette[index + 1] = gray;	// green
-//				palette[index + 2] = gray;	// red
-//				palette[index + 3] = 0x0;	// reserved
-//			}
-//		}
-//		else if (type == RGB)
-//		{
-//			uint8_t	gap = 255 / (color_number - 1);
-			for (uint32_t i = 0; i < color_number; i++)
-			{
-//				uint32_t	index = i << 2;
-//				palette[index] = (uint8_t)(i % 256);
-//				palette[index + 1] = (uint8_t)(i * 2 % 256);
-//				palette[index + 2] = (uint8_t)(i * 4 % 256);
-//				palette[index + 3] = 0x0;
+		for (uint16_t i = 0; i < color_number; i++)
+		{
+			uint16_t index = i << 2; // RGBA 인덱스 (i * 4)
 
+			if (i < 216) {
+				// 216색 RGB 조합 (6단계씩)
+				uint8_t r = (i / 36) % 6;       // R 값 (0~5)
+				uint8_t g = (i / 6) % 6;        // G 값 (0~5)
+				uint8_t b = i % 6;              // B 값 (0~5)
 
-				uint32_t index = i << 2; // RGBA 인덱스 (i * 4)
-
-				if (i < 216) {
-					// 216색 RGB 조합 (6단계씩)
-					uint8_t r = (i / 36) % 6;       // R 값 (0~5)
-					uint8_t g = (i / 6) % 6;        // G 값 (0~5)
-					uint8_t b = i % 6;              // B 값 (0~5)
-
-					palette[index] = b * 51;        // B 채널
-					palette[index + 1] = g * 51;    // G 채널
-					palette[index + 2] = r * 51;    // R 채널
-					palette[index + 3] = 0;         // Alpha 채널 (0)
-				} else {
-					// 39색 회색조 추가
-					uint8_t gray = (i - 216) * 6;   // 회색 단계 (0~255)
-					palette[index] = gray;          // R = G = B
-					palette[index + 1] = gray;
-					palette[index + 2] = gray;
-					palette[index + 3] = 0;         // Alpha 채널 (0)
-				}
+				palette[index] = b * 51;        // B 채널
+				palette[index + 1] = g * 51;    // G 채널
+				palette[index + 2] = r * 51;    // R 채널
+				palette[index + 3] = 0;         // Alpha 채널 (0)
 			}
-//		}
+			else
+			{
+				// 39색 회색조 추가
+				uint8_t gray = (i - 216) * 6;   // 회색 단계 (0~255)
+				palette[index] = gray;          // R = G = B
+				palette[index + 1] = gray;
+				palette[index + 2] = gray;
+				palette[index + 3] = 0;         // Alpha 채널 (0)
+			}
+		}
 	}
 	catch (const std::exception& e)
 	{
@@ -280,7 +258,7 @@ void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
 	}
 }
 
-uint32_t	Serializer::chooseOption(enum optionDisplayMode mode)
+uint8_t	Serializer::chooseOption(enum optionDisplayMode mode)
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
@@ -294,7 +272,7 @@ uint32_t	Serializer::chooseOption(enum optionDisplayMode mode)
 			std::cin.read(&c, 1);
 			if (c == 'C' || c == 'D')
 			{
-				option = static_cast<enum button>(!option);
+				option = option == LEFT ? RIGHT : LEFT;
 				displayOption(mode, option);
 			}
 		}
@@ -328,9 +306,9 @@ void	Serializer::setColorIndex()
 			data.color_index[3] = 225;
 			break;
 		case RGB:
-			data.color_index[1] = 180;
-			data.color_index[2] = 18;
-			data.color_index[3] = 5;
+			data.color_index[1] = 180;	// R
+			data.color_index[2] = 18;	// G
+			data.color_index[3] = 5;	// B
 			break;
 	}
 	data.color_index[4] = ~(data.bgcolor);
@@ -372,7 +350,7 @@ uint32_t	Serializer::setConfig()
 
 	setRawMode(true);
 
-	data.bgcolor = static_cast<int>(chooseOption(BGCOLOR)) * 0xFF;
+	data.bgcolor = chooseOption(BGCOLOR) * 0xFF;
 	data.palette_type = static_cast<enum paletteType>(chooseOption(PALETTE_TYPE));
 
 	setColorIndex();
@@ -533,13 +511,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 /////PIXEL//////DATA////////////////////////////////////
 
-//	// 비트 깊이가 8 이하일 때는 배열의 요소 개수를 반으로 줄이고, 값을 할당할 때 두 개의 픽셀값을 한번에 할당.
-//	// 8비트 이하일 때는 배열의 요소 개수가 실제 픽셀 개수의 반이기 때문에 값을 할당할 때 width를 조정해야 한다.
-//	++ 복잡하다 그냥 8비트로 하자. 어차피 색상도 제한할 거고... 굳이 16비트 픽셀을 지원할 이유가 없다.
 	uint8_t*	pixel_data = 0;
-//	uint32_t	pixel_data_size = padded_matrix_size;
-//	uint32_t	pixel_data_row = info_header.width;
-//	uint32_t	pixel_data_padded_row = padded_row_size;
 
 	try
 	{
