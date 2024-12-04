@@ -575,7 +575,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	delete[] palette;
 	delete[] pixel_data;
 
-	return reinterpret_cast<uintptr_t>(ptr);
+	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
 }
 
 //Data*	Serializer::deserialize(uintptr_t raw)
