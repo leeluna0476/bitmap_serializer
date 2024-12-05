@@ -131,12 +131,10 @@ uint32_t	Serializer::checkEscape(char* cptr)
 }
 
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
-// 0 <= ti < terminal_width
-// 0 <= tj < terminal_height
 uint32_t	Serializer::getPixel(Data& data)
 {
 	char		c;
-	uint32_t	ret = 1;
+	uint32_t	ret = 0;
 	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
@@ -189,13 +187,6 @@ uint32_t	Serializer::getPixel(Data& data)
 	return ret;
 }
 
-// mode
-// 0 -> choose bgcolor
-// 1 -> finish drawing yes or no
-//
-// option
-// 0 -> black, no
-// 1 -> white, yes
 void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t option)
 {
 	static const char*	option_box[][5] =
@@ -218,7 +209,7 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"┌───────────────────────────┐",
 			"│      Finish  drawing      │",
 			"│                           │",
-			"│ [Save] [Continue] [Draft] │",
+			"│ [Continue] [Save] [Draft] │",
 			"└───────────────────────────┘"
 		},
 		{
@@ -242,9 +233,9 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			""
 		},
 		{
-			"│ \033[44m[Save]\033[0m [Continue] [Draft] │",
-			"│ [Save] \033[44m[Continue]\033[0m [Draft] │",
-			"│ [Save] [Continue] \033[44m[Draft]\033[0m │"
+			"│ \033[44m[Continue]\033[0m [Save] [Draft] │",
+			"│ [Continue] \033[44m[Save]\033[0m [Draft] │",
+			"│ [Continue] [Save] \033[44m[Draft]\033[0m │"
 		}
 	};
 
@@ -256,8 +247,8 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 	}
 	else if (mode == FINISH_DRAWING || mode == CLEAR)
 	{
-		tab_vert = 13;
-		tab_horiz = data.terminal_width + 5;
+		tab_vert = 14;
+		tab_horiz = data.terminal_width + 6;
 	}
 
 	for (uint8_t i = 0; i < 5; i++)
@@ -414,8 +405,9 @@ void	Serializer::initScreen(Data& data)
 		<< "1. Move the cursor by the arrow keys.\n" << "\033[" << data.terminal_width + 6 << "C" \
 		<< "2. Enter the color by { 1, 2, 3, 4 }.\n" << "\033[" << data.terminal_width + 6 << "C" \
 		<< "  - { 1, 2, 3 } are the three palette colors and 4 is the color opposite to the background color.\n"  << "\033[" << data.terminal_width + 6 << "C" \
-		<< "3. Press <backspace> to erase the pixel\n" << "\033[" << data.terminal_width + 6 << "C" \
-		<< "4. Enter 'L' to clear the screen.\n";
+		<< "3. Enter <backspace> to erase the pixel.\n" << "\033[" << data.terminal_width + 6 << "C" \
+		<< "4. Enter 'L' to clear the screen.\n" << "\033[" << data.terminal_width + 6 << "C" \
+		<< "5. Enter <Enter> to finish or draft the job.\n";
 	std::cout << LEFT_TOP << std::flush;
 }
 
@@ -429,21 +421,20 @@ void	Serializer::draw(Data& data)
 		{
 			data.terminal_pixel_data[i] = new uint8_t[data.terminal_width]();
 		}
+
+		for (;;)
+		{
+			if (getPixel(data) == 1)
+			{
+				break;
+			}
+		}
+
+		std::cout << "\033[" << data.terminal_width + 2 << ";" << 0 << "H" << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		return;
-		// exception 어디서 잡을지 고민...
 	}
-
-	for (;;)
-	{
-		if (getPixel(data) == 0)
-		{
-			break;
-		}
-	}
-//	std::cout << CLEAR_SCREEN << std::flush;
 }
 
 Data*	Serializer::generateImgData()
@@ -465,6 +456,7 @@ Data*	Serializer::generateImgData()
 	catch (const std::exception& e)
 	{
 		delete data;
+		data = NULL;
 	}
 	return data;
 }
