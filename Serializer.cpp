@@ -623,7 +623,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	if (infile.is_open() == 0)
 	{
 		std::cerr << "Cannot open file" << std::endl;
-		return 0;
+		return NULL;
 	}
 
 // CHECK IF IT IS A DRAFT FILE
@@ -732,6 +732,8 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		}
 		delete[] ptr->terminal_pixel_data;
 		delete ptr;
+
+		return NULL;
 	}
 
 	infile.close();
