@@ -186,7 +186,7 @@ void	Serializer::displayOption(enum optionDisplayMode mode, int8_t option)
 	{
 		{
 			"┌────────────────────────┐",
-			"│     select bgcolor     │",
+			"│     Select bgcolor     │",
 			"│                        │",
 			"│    [black]  [white]    │",
 			"└────────────────────────┘"
