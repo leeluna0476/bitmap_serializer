@@ -153,7 +153,7 @@ uint32_t	Serializer::getPixel()
 		}
 		else if (c == '\n') // 입력 끝?
 		{
-			ret = chooseOption(FINISH_DRAWING, 2);
+			ret = chooseOption(FINISH_DRAWING, 3);
 		}
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
@@ -185,47 +185,50 @@ void	Serializer::displayOption(enum optionDisplayMode mode, int8_t option)
 	static const char*	option_box[4][5] =
 	{
 		{
-			"┌────────────────────────┐",
-			"│     Select bgcolor     │",
-			"│                        │",
-			"│    [black]  [white]    │",
-			"└────────────────────────┘"
+			"┌───────────────────────────┐",
+			"│      Select  bgcolor      │",
+			"│                           │",
+			"│     [black]   [white]     │",
+			"└───────────────────────────┘"
 		},
 		{
-			"┌────────────────────────┐",
-			"│     Select palette     │",
-			"│                        │",
-			"│     [GRAY]   [RGB]     │",
-			"└────────────────────────┘"
+			"┌───────────────────────────┐",
+			"│      Select  palette      │",
+			"│                           │",
+			"│      [GRAY]    [RGB]      │",
+			"└───────────────────────────┘"
 		},
 		{
-			"┌────────────────────────┐",
-			"│     Finish drawing     │",
-			"│                        │",
-			"│      [yes]   [no]      │",
-			"└────────────────────────┘"
+			"┌───────────────────────────┐",
+			"│      Finish  drawing      │",
+			"│                           │",
+			"│ [Save] [Continue] [Draft] │",
+			"└───────────────────────────┘"
 		},
 		{
-			"                          ",
-			"                          ",
-			"                          ",
-			"                          ",
-			"                          "
+			"                             ",
+			"                             ",
+			"                             ",
+			"                             ",
+			"                             "
 		}
 	};
-	static const char*	option_highlight[3][2] =
+	static const char*	option_highlight[3][3] =
 	{
 		{
-			"│    \033[44m[black]\033[0m  [white]    │",
-			"│    [black]  \033[44m[white]\033[0m    │"
+			"│     \033[44m[black]\033[0m   [white]     │",
+			"│     [black]   \033[44m[white]\033[0m     │",
+			""
 		},
 		{
-			"│     \033[44m[GRAY]\033[0m   [RGB]     │",
-			"│     [GRAY]   \033[44m[RGB]\033[0m     │"
+			"│      \033[44m[GRAY]\033[0m    [RGB]      │",
+			"│      [GRAY]    \033[44m[RGB]\033[0m      │",
+			""
 		},
 		{
-			"│      \033[44m[yes]\033[0m   [no]      │",
-			"│      [yes]   \033[44m[no]\033[0m      │"
+			"│ \033[44m[Save]\033[0m [Continue] [Draft] │",
+			"│ [Save] \033[44m[Continue]\033[0m [Draft] │",
+			"│ [Save] [Continue] \033[44m[Draft]\033[0m │"
 		}
 	};
 
