@@ -153,7 +153,7 @@ uint32_t	Serializer::getPixel()
 		}
 		else if (c == '\n') // 입력 끝?
 		{
-			ret = chooseOption(FINISH_DRAWING);
+			ret = chooseOption(FINISH_DRAWING, 2);
 		}
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
@@ -180,111 +180,115 @@ uint32_t	Serializer::getPixel()
 // option
 // 0 -> black, no
 // 1 -> white, yes
-void	Serializer::displayOption(enum optionDisplayMode mode, enum button option)
+void	Serializer::displayOption(enum optionDisplayMode mode, int8_t option)
 {
-	const uint32_t	tab_horiz = data.terminal_width + 5;
-
-	switch (mode)
+	static const char*	option_box[4][5] =
 	{
-		case BGCOLOR:
-			std::cout << "\033[5;H" \
-				<< "┌────────────────────────┐\n" \
-				<< "│     Select bgcolor     │\n" \
-				<< "│                        │\n" \
-				<< "│    [black]  [white]    │\n" \
-				<< "└────────────────────────┘";
+		{
+			"┌────────────────────────┐",
+			"│     select bgcolor     │",
+			"│                        │",
+			"│    [black]  [white]    │",
+			"└────────────────────────┘"
+		},
+		{
+			"┌────────────────────────┐",
+			"│     Select palette     │",
+			"│                        │",
+			"│     [GRAY]   [RGB]     │",
+			"└────────────────────────┘"
+		},
+		{
+			"┌────────────────────────┐",
+			"│     Finish drawing     │",
+			"│                        │",
+			"│      [yes]   [no]      │",
+			"└────────────────────────┘"
+		},
+		{
+			"                          ",
+			"                          ",
+			"                          ",
+			"                          ",
+			"                          "
+		}
+	};
+	static const char*	option_highlight[3][3] =
+	{
+		{
+			"│    \033[44m[black]\033[0m  [white]    │",
+			"│    [black]  \033[44m[white]\033[0m    │",
+			""
+		},
+		{
+			"│     \033[44m[GRAY]\033[0m   [RGB]     │",
+			"│     [GRAY]   \033[44m[RGB]\033[0m     │",
+			""
+		},
+		{
+			"│      \033[44m[yes]\033[0m   [no]      │",
+			"│      [yes]   \033[44m[no]\033[0m      │",
+			""
+		}
+	};
 
-			switch (option)
-			{
-				case LEFT:
-					std::cout << "\033[8;" << "H│    \033[44m[black]\033[0m  [white]    │";
-					break;
-				case RIGHT:
-					std::cout << "\033[8;" << "H│    [black]  \033[44m[white]\033[0m    │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case PALETTE_TYPE:
-			std::cout << "\033[10H" \
-				<< "┌────────────────────────┐\n" \
-				<< "│     Select palette     │\n" \
-				<< "│                        │\n" \
-				<< "│     [GRAY]   [RGB]     │\n" \
-				<< "└────────────────────────┘";
+	uint32_t	tab_vert = 5;
+	uint32_t	tab_horiz = 0;
+	if (mode == PALETTE_TYPE)
+	{
+		tab_vert *= 2;
+	}
+	else if (mode == FINISH_DRAWING || mode == CLEAR)
+	{
+		tab_vert = 13;
+		tab_horiz = data.terminal_width + 5;
+	}
 
-			switch (option)
-			{
-				case LEFT:
-					std::cout << "\033[13;" << "H│     \033[44m[GRAY]\033[0m   [RGB]     │";
-					break;
-				case RIGHT:
-					std::cout << "\033[13;" << "H│     [GRAY]   \033[44m[RGB]\033[0m     │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case FINISH_DRAWING:
-			std::cout \
-				<< "\033[13;" << tab_horiz << "H┌────────────────────────┐" \
-				<< "\033[14;" << tab_horiz << "H│     Finish drawing     │" \
-				<< "\033[15;" << tab_horiz << "H│                        │" \
-				<< "\033[16;" << tab_horiz << "H│      [yes]   [no]      │" \
-				<< "\033[17;" << tab_horiz << "H└────────────────────────┘";
-			switch (option)
-			{
-				case LEFT:
-					std::cout << "\033[16;" << tab_horiz << "H│      \033[44m[yes]\033[0m   [no]      │";
-					break;
-				case RIGHT:
-					std::cout << "\033[16;" << tab_horiz << "H│      [yes]   \033[44m[no]\033[0m      │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case CLEAR:
-			std::cout \
-				<< "\033[13;" << tab_horiz << "H                          " \
-				<< "\033[14;" << tab_horiz << "H                          " \
-				<< "\033[15;" << tab_horiz << "H                          " \
-				<< "\033[16;" << tab_horiz << "H                          " \
-				<< "\033[17;" << tab_horiz << "H                          ";
-			break;
-		default:
-			break;
+	for (uint8_t i = 0; i < 5; i++)
+	{
+		std::cout << "\033[" << tab_vert++ << ";" << tab_horiz << "H";
+		std::cout << option_box[mode][i] << "\n";
+	}
+
+	if (mode != CLEAR)
+	{
+		std::cout << "\033[" << tab_vert - 2 << ";" << tab_horiz << "H";
+		std::cout << option_highlight[mode][option];
 	}
 }
 
-uint8_t	Serializer::chooseOption(enum optionDisplayMode mode)
+uint8_t	Serializer::chooseOption(enum optionDisplayMode mode, uint8_t button_number)
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
-	displayOption(mode, LEFT);
-	enum button	option = LEFT;
+
+	displayOption(mode, FIRST);
+	int8_t	option = FIRST;
+
 	char	c;
 	for (;;)
 	{
 		if (checkEscape(&c) == 1)
 		{
 			std::cin.read(&c, 1);
-			if (c == 'C' || c == 'D')
+			if (c == 'C')
 			{
-				option = option == LEFT ? RIGHT : LEFT;
-				displayOption(mode, option);
+				option = (option + 1) % button_number;
 			}
+			else if (c == 'D')
+			{
+				option = (option - 1 + button_number) % button_number;
+			}
+			displayOption(mode, option);
 		}
 		else if (c == '\n')
 		{
 			if (mode == FINISH_DRAWING)
 			{
-				displayOption(CLEAR, RIGHT);
+				displayOption(CLEAR, FIRST);
 			}
 			break;
 		}
-		usleep(10000);
 	}
 
 	// 커서 위치 복원
@@ -350,8 +354,8 @@ uint32_t	Serializer::setConfig()
 
 	setRawMode(true);
 
-	data.bgcolor = chooseOption(BGCOLOR) * 0xFF;
-	data.palette_type = static_cast<enum paletteType>(chooseOption(PALETTE_TYPE));
+	data.bgcolor = chooseOption(BGCOLOR, 2) * 0xFF;
+	data.palette_type = static_cast<enum paletteType>(chooseOption(PALETTE_TYPE, 2));
 
 	setColorIndex();
 
@@ -424,8 +428,6 @@ void	Serializer::draw()
 		{
 			break;
 		}
-		// CPU 부하 방지.
-		usleep(10000);
 	}
 //	std::cout << CLEAR_SCREEN << std::flush;
 }
@@ -578,6 +580,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
 }
 
+// raw == filename
 //Data*	Serializer::deserialize(uintptr_t raw)
 //{
 //}
