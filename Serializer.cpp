@@ -291,6 +291,13 @@ uint8_t	Serializer::chooseOption(enum optionDisplayMode mode, uint8_t button_num
 		}
 	}
 
+	if (option == 2)
+	{
+		data.magic_number = 0x4A53;
+		data.filename += "_draft";
+		option = 0;
+	}
+
 	// 커서 위치 복원
 	std::cout << "\033[" << data.tj + 2 << ";" << data.ti + 2 << "H";
 	// 커서 보이기
@@ -324,6 +331,8 @@ uint32_t	Serializer::setConfig()
 {
 	std::cout << CLEAR_SCREEN << std::flush;
 
+	data.magic_number = 0x4D42;
+
 	std::string	user_input;
 	// get user input width
 	std::cout << "[Enter image width]: ";
@@ -350,7 +359,6 @@ uint32_t	Serializer::setConfig()
 	std::cout << "[Enter filename]: ";
 	std::cout << "\n(output: <filename>.bmp)\033[A\033[6D";
 	getline(std::cin, data.filename);
-	data.filename += ".bmp";
 
 	setRawMode(true);
 
@@ -441,6 +449,7 @@ Data*	Serializer::generateImgData()
 
 	initScreen();
 	draw();
+	data.filename += ".bmp";
 	return &data;
 }
 
@@ -470,7 +479,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	// 색상 개수 * 4. 바이트 단위.
 	uint32_t	palette_size = info_header.color_number << 2;
 /////FILE//////HEADER///////////////////////////////////
-	file_header.type = 0x4D42;
+	file_header.type = data.magic_number;
 	// file header size + info header size + palette size + pixel data
 	// 각 픽셀 크기는 bits_per_pixel에 따름, 픽셀 개수는 너비와 동, 패딩 사이즈 = (4 - (pixel % 4)) % 4
 	// palette 크기는 조건부. 비트 깊이가 8비트 이하일 때만 적용.

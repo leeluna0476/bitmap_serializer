@@ -32,6 +32,7 @@ enum	optionDisplayMode
 
 typedef struct _Data
 {
+	uint16_t			magic_number; // BM, SJ
 	// image 기준.
 	uint32_t			raw_width;
 	uint32_t			raw_height;
