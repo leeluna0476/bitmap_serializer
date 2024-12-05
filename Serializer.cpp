@@ -213,22 +213,19 @@ void	Serializer::displayOption(enum optionDisplayMode mode, int8_t option)
 			"                          "
 		}
 	};
-	static const char*	option_highlight[3][3] =
+	static const char*	option_highlight[3][2] =
 	{
 		{
 			"│    \033[44m[black]\033[0m  [white]    │",
-			"│    [black]  \033[44m[white]\033[0m    │",
-			""
+			"│    [black]  \033[44m[white]\033[0m    │"
 		},
 		{
 			"│     \033[44m[GRAY]\033[0m   [RGB]     │",
-			"│     [GRAY]   \033[44m[RGB]\033[0m     │",
-			""
+			"│     [GRAY]   \033[44m[RGB]\033[0m     │"
 		},
 		{
 			"│      \033[44m[yes]\033[0m   [no]      │",
-			"│      [yes]   \033[44m[no]\033[0m      │",
-			""
+			"│      [yes]   \033[44m[no]\033[0m      │"
 		}
 	};
 

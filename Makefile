@@ -2,7 +2,7 @@
 
 NAME=bmp_serializer
 CXX=c++
-CXXFLAGS=-Wall -Wextra -Werror --std=c++98 -Wpedantic -fsanitize=address
+CXXFLAGS=-Wall -Wextra -Werror --std=c++98 -Wpedantic
 CPPFLAGS=-MMD -MP -MF $(DEPS_DIR)/$*.d
 
 RM=rm -fr
