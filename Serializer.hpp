@@ -21,8 +21,8 @@ class	Serializer
 		static void			clearPixel();
 		static uint32_t		checkEscape(char* cptr);
 		static uint32_t		getPixel();
-		static void			displayOption(enum optionDisplayMode mode, enum button option);
-		static uint8_t		chooseOption(enum optionDisplayMode mode);
+		static void			displayOption(enum optionDisplayMode mode, int8_t option);
+		static uint8_t		chooseOption(enum optionDisplayMode mode, uint8_t button_number);
 
 		static void			setColorIndex();
 		static uint32_t		setConfig();
