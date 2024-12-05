@@ -182,79 +182,78 @@ uint32_t	Serializer::getPixel()
 // 1 -> white, yes
 void	Serializer::displayOption(enum optionDisplayMode mode, int8_t option)
 {
-	const uint32_t	tab_horiz = data.terminal_width + 5;
-
-	switch (mode)
+	static const char*	option_box[4][5] =
 	{
-		case BGCOLOR:
-			std::cout << "\033[5;H" \
-				<< "┌────────────────────────┐\n" \
-				<< "│     Select bgcolor     │\n" \
-				<< "│                        │\n" \
-				<< "│    [black]  [white]    │\n" \
-				<< "└────────────────────────┘";
+		{
+			"┌────────────────────────┐",
+			"│     select bgcolor     │",
+			"│                        │",
+			"│    [black]  [white]    │",
+			"└────────────────────────┘"
+		},
+		{
+			"┌────────────────────────┐",
+			"│     Select palette     │",
+			"│                        │",
+			"│     [GRAY]   [RGB]     │",
+			"└────────────────────────┘"
+		},
+		{
+			"┌────────────────────────┐",
+			"│     Finish drawing     │",
+			"│                        │",
+			"│      [yes]   [no]      │",
+			"└────────────────────────┘"
+		},
+		{
+			"                          ",
+			"                          ",
+			"                          ",
+			"                          ",
+			"                          "
+		}
+	};
+	static const char*	option_highlight[3][3] =
+	{
+		{
+			"│    \033[44m[black]\033[0m  [white]    │",
+			"│    [black]  \033[44m[white]\033[0m    │",
+			""
+		},
+		{
+			"│     \033[44m[GRAY]\033[0m   [RGB]     │",
+			"│     [GRAY]   \033[44m[RGB]\033[0m     │",
+			""
+		},
+		{
+			"│      \033[44m[yes]\033[0m   [no]      │",
+			"│      [yes]   \033[44m[no]\033[0m      │",
+			""
+		}
+	};
 
-			switch (option)
-			{
-				case FIRST:
-					std::cout << "\033[8;" << "H│    \033[44m[black]\033[0m  [white]    │";
-					break;
-				case SECOND:
-					std::cout << "\033[8;" << "H│    [black]  \033[44m[white]\033[0m    │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case PALETTE_TYPE:
-			std::cout << "\033[10H" \
-				<< "┌────────────────────────┐\n" \
-				<< "│     Select palette     │\n" \
-				<< "│                        │\n" \
-				<< "│     [GRAY]   [RGB]     │\n" \
-				<< "└────────────────────────┘";
+	uint32_t	tab_vert = 5;
+	uint32_t	tab_horiz = 0;
+	if (mode == PALETTE_TYPE)
+	{
+		tab_vert *= 2;
+	}
+	else if (mode == FINISH_DRAWING || mode == CLEAR)
+	{
+		tab_vert = 13;
+		tab_horiz = data.terminal_width + 5;
+	}
 
-			switch (option)
-			{
-				case FIRST:
-					std::cout << "\033[13;" << "H│     \033[44m[GRAY]\033[0m   [RGB]     │";
-					break;
-				case SECOND:
-					std::cout << "\033[13;" << "H│     [GRAY]   \033[44m[RGB]\033[0m     │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case FINISH_DRAWING:
-			std::cout \
-				<< "\033[13;" << tab_horiz << "H┌────────────────────────┐" \
-				<< "\033[14;" << tab_horiz << "H│     Finish drawing     │" \
-				<< "\033[15;" << tab_horiz << "H│                        │" \
-				<< "\033[16;" << tab_horiz << "H│      [yes]   [no]      │" \
-				<< "\033[17;" << tab_horiz << "H└────────────────────────┘";
-			switch (option)
-			{
-				case FIRST:
-					std::cout << "\033[16;" << tab_horiz << "H│      \033[44m[yes]\033[0m   [no]      │";
-					break;
-				case SECOND:
-					std::cout << "\033[16;" << tab_horiz << "H│      [yes]   \033[44m[no]\033[0m      │";
-					break;
-				default:
-					break;
-			}
-			break;
-		case CLEAR:
-			std::cout \
-				<< "\033[13;" << tab_horiz << "H                          " \
-				<< "\033[14;" << tab_horiz << "H                          " \
-				<< "\033[15;" << tab_horiz << "H                          " \
-				<< "\033[16;" << tab_horiz << "H                          " \
-				<< "\033[17;" << tab_horiz << "H                          ";
-			break;
-		default:
-			break;
+	for (uint8_t i = 0; i < 5; i++)
+	{
+		std::cout << "\033[" << tab_vert++ << ";" << tab_horiz << "H";
+		std::cout << option_box[mode][i] << "\n";
+	}
+
+	if (mode != CLEAR)
+	{
+		std::cout << "\033[" << tab_vert - 2 << ";" << tab_horiz << "H";
+		std::cout << option_highlight[mode][option];
 	}
 }
 
@@ -290,7 +289,6 @@ uint8_t	Serializer::chooseOption(enum optionDisplayMode mode, uint8_t button_num
 			}
 			break;
 		}
-		usleep(10000);
 	}
 
 	// 커서 위치 복원
@@ -430,8 +428,6 @@ void	Serializer::draw()
 		{
 			break;
 		}
-		// CPU 부하 방지.
-		usleep(10000);
 	}
 //	std::cout << CLEAR_SCREEN << std::flush;
 }
