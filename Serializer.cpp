@@ -724,6 +724,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		std::cout << "exception" << std::endl;
 
 		infile.close();
+
 		delete[] pixel_data;
 		if (ptr->terminal_pixel_data != NULL)
 		{
