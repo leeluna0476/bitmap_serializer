@@ -13,25 +13,27 @@ class	Serializer
 		void	operator=(const Serializer& other);
 		~Serializer();
 
-		static Data		data;
-		static const char*	palette_index[2][5];
+//		static Data		data;
+		static const uint8_t	palette[][3];
 
 		static void			setRawMode(bool enable);
 		static uint8_t*		generatePalette(uint32_t size, uint32_t color_number);
-		static void			clearPixel();
+		static void			clearPixel(Data& data);
 		static uint32_t		checkEscape(char* cptr);
-		static uint32_t		getPixel();
-		static void			displayOption(enum optionDisplayMode mode, int8_t option);
-		static uint8_t		chooseOption(enum optionDisplayMode mode, uint8_t button_number);
+		static uint32_t		getPixel(Data& data);
+		static void			displayOption(Data& data, enum optionDisplayMode mode, int8_t option);
+		static uint8_t		chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number);
 
-		static void			setColorIndex();
-		static uint32_t		setConfig();
-		static void			initScreen();
-		static void			draw();
+		static void			setColorIndex(Data& data);
+		static uint32_t		setConfig(Data& data);
+		static void			initScreen(Data& data);
+		static void			draw(Data& data);
+
+		static uint32_t		searchPalette(uint8_t c);
 	public:
 		static Data*		generateImgData();
 		static uintptr_t	serialize(Data* ptr);
-//		static Data*		deserialize(uintptr_t raw);
+		static Data*		deserialize(uintptr_t raw);
 };
 
 #endif

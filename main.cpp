@@ -6,6 +6,9 @@ int	main(void)
 	if (data != NULL)
 	{
 		Serializer::serialize(data);
+		delete data;
 	}
+
+//	Serializer::deserialize(reinterpret_cast<uintptr_t>("test_draft.bmp"));
 	return 0;
 }
