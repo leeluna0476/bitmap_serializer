@@ -28,8 +28,6 @@ class	Serializer
 		static uint32_t		setConfig(Data& data);
 		static void			initScreen(Data& data);
 		static void			draw(Data& data);
-
-		static uint32_t		searchPalette(uint8_t c);
 	public:
 		static Data*		generateImgData();
 		static uintptr_t	serialize(Data* ptr);

@@ -598,6 +598,12 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	}
 	outfile.write(reinterpret_cast<const char*>(&pixel_data[0]), padded_row_size);
 
+	if (ptr->magic_number == 0x4A53)
+	{
+		outfile.write(reinterpret_cast<const char*>(&(ptr->palette_type)), sizeof(uint8_t));
+		outfile.write(reinterpret_cast<const char*>(&(ptr->bgcolor)), sizeof(uint8_t));
+	}
+
 	outfile.close();
 
 	delete[] palette;
@@ -605,32 +611,6 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
 }
-
-uint32_t	Serializer::searchPalette(uint8_t c)
-{
-	uint32_t	size_horiz = sizeof(palette) / sizeof(uint8_t) / 3;
-	for (uint32_t j = 0; j < size_horiz; j++)
-	{
-		for (uint32_t i = 0; i < 3; i++)
-		{
-			if (palette[j][i] == c)
-			{
-				return j;
-			}
-		}
-	}
-
-	return size_horiz;
-}
-
-// 픽셀 데이터 유효성 체크.
-// 1. 첫번째 색으로 팔레트 확인.
-// 2. 모든 픽셀을 탐색하면서 팔레트에 존재하는 색만 있는지 확인.
-//uint8_t	Serializer::checkColorvalidity(const struct BmpInfoHeader& info_header, const std::ifstream infile)
-//{
-//
-//	return 1;
-//}
 
 // raw == draft filename
 Data*	Serializer::deserialize(uintptr_t raw)
@@ -646,6 +626,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		return 0;
 	}
 
+// CHECK IF IT IS A DRAFT FILE
 	infile.read(reinterpret_cast<char*>(&(file_header.type)), 2);
 	if (file_header.type != 0x4A53)
 	{
@@ -671,16 +652,12 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	infile.read(reinterpret_cast<char*>(&(file_header.offbits)), 4);
 	infile.seekg(file_header.offbits, std::ios::beg);
 
-// READ FILE
+// READ PIXEL DATA
 	uint16_t	pixel_size = (info_header.bits_per_pixel + 7) >> 3;
 	// 행 하나에 할당되는 바이트 수.
 	uint32_t	row_size_byte = info_header.width * pixel_size;
 	// 각 행을 4의 배수로 패딩.
 	uint32_t	padding = (4 - (row_size_byte % 4)) % 4;
-	// 패딩 처리한 행의 바이트 수.
-//	uint32_t	padded_row_size = row_size_byte + padding;
-	// 패딩 처리한 행 * 높이.
-//	uint32_t	padded_matrix_size = info_header.height * padded_row_size;
 	uint32_t	matrix_size = info_header.height * info_header.width;
 
 	uint8_t*	pixel_data = NULL;
@@ -699,8 +676,10 @@ Data*	Serializer::deserialize(uintptr_t raw)
 
 		// generate charset
 
-		uint8_t	pidx = searchPalette(pixel_data[0]);
-		uint32_t	charset = (palette[pidx][2] << 16) | (palette[pidx][1] << 8) | palette[pidx][0];
+		uint8_t	_palette_type = 0;
+		infile.read(reinterpret_cast<char*>(&_palette_type), sizeof(uint8_t));
+
+		uint32_t	charset = (palette[_palette_type][2] << 16) | (palette[_palette_type][1] << 8) | palette[_palette_type][0];
 		for (uint32_t i = 0; i < matrix_size; i++)
 		{
 			uint8_t c = pixel_data[i];
@@ -710,8 +689,8 @@ Data*	Serializer::deserialize(uintptr_t raw)
 			}
 		}
 
-		// deserialize
-		ptr = new Data;
+// DESERIALIZE
+		ptr = new Data();
 		ptr->magic_number = 0x424D;
 		ptr->raw_width = info_header.width;
 		ptr->raw_height = info_header.height;
@@ -725,14 +704,39 @@ Data*	Serializer::deserialize(uintptr_t raw)
 			ptr->filename[pos] = '\0';
 		}
 
-		ptr->palette_type = pidx;
+		ptr->palette_type = _palette_type;
+
+		infile.read(reinterpret_cast<char*>(&(ptr->bgcolor)), sizeof(uint8_t));
+
+		ptr->terminal_pixel_data = new uint8_t*[ptr->terminal_height]();
+		for (uint32_t j = 0; j < ptr->terminal_height; j++)
+		{
+			ptr->terminal_pixel_data[j] = new uint8_t[ptr->terminal_width]();
+			uint32_t	line_gap = j * 10 * ptr->raw_width;
+			for (uint32_t i = 0; i < ptr->terminal_width; i++)
+			{
+				ptr->terminal_pixel_data[j][i] = pixel_data[line_gap + i * 10];
+			}
+		}
 	}
 	catch (const std::exception& e)
 	{
 		std::cout << "exception" << std::endl;
 		delete[] pixel_data;
+		if (ptr->terminal_pixel_data != NULL)
+		{
+			for (uint32_t i = 0; i < ptr->terminal_height; i++)
+			{
+				delete ptr->terminal_pixel_data[i];
+			}
+		}
+		delete[] ptr->terminal_pixel_data;
 		delete ptr;
 	}
+
+	infile.close();
+
+	delete[] pixel_data;
 
 	return ptr;
 }
