@@ -21,7 +21,6 @@ class	Serializer
 		static uint32_t		getPixel(Data& data);
 		static void			displayOption(Data& data, enum optionDisplayMode mode, int8_t option);
 		static uint8_t		chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number);
-
 		static void			setColorIndex(Data& data);
 		static uint32_t		setConfig(Data& data);
 		static void			initScreen(Data& data);
@@ -30,6 +29,7 @@ class	Serializer
 		static Data*		generateImgData();
 		static uintptr_t	serialize(Data* ptr);
 		static Data*		deserialize(uintptr_t raw);
+		static uint32_t		reloadTerminalData(Data* data);
 };
 
 #endif
