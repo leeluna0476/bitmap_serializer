@@ -205,11 +205,11 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 		}
 	};
 
-	uint32_t	tab_vert = 5;
+	uint32_t	tab_vert = 10;
 	uint32_t	tab_horiz = 0;
 	if (mode == PALETTE_TYPE)
 	{
-		tab_vert *= 2;
+		tab_vert += 5;
 	}
 	else if (mode == FINISH_DRAWING || mode == CLEAR)
 	{
@@ -263,20 +263,23 @@ uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_
 			if (mode == FINISH_DRAWING)
 			{
 				displayOption(data, CLEAR, FIRST);
+				if (option == FIRST)
+				{
+					// 커서 위치 복원
+					std::cout << "\033[" << data.tj + 2 << ";" << data.ti + 2 << "H";
+				}
+				else if (option == THIRD)
+				{
+					data.magic_number = 0x4A53;
+					data.filename += "_draft";
+					option = 1;
+				}
 			}
 			break;
 		}
 	}
 
-	if (option == THIRD)
-	{
-		data.magic_number = 0x4A53;
-		data.filename += "_draft";
-		option = 1;
-	}
 
-	// 커서 위치 복원
-	std::cout << "\033[" << data.tj + 2 << ";" << data.ti + 2 << "H";
 	// 커서 보이기
 	std::cout << "\033[?25h";
 
@@ -294,7 +297,7 @@ void	Serializer::setColorIndex(Data& data)
 
 uint32_t	Serializer::setConfig(Data& data)
 {
-	std::cout << CLEAR_SCREEN << std::flush;
+	std::cout << "\033[6;0H";
 
 	data.magic_number = 0x4D42;
 
@@ -343,7 +346,7 @@ void	Serializer::initScreen(Data& data)
 	data.ti = 0;
 	data.tj = 0;
 
-	std::cout << CLEAR_SCREEN << std::flush;
+	std::cout << CLEAR_SCREEN;
 
 	std::ostringstream	oss;
 	for (uint32_t i = 0; i < data.terminal_width; i++)
@@ -650,7 +653,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		return NULL;
 	}
 
-	infile.seekg(8, std::ios::cur);
+	infile.seekg(2, std::ios::cur);
 	infile.read(reinterpret_cast<char*>(&(info_header.bits_per_pixel)), 2);
 
 	infile.seekg(10, std::ios::beg);
@@ -671,13 +674,12 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	{
 		pixel_data = new uint8_t[matrix_size];
 		// 뒤집어서 저장.
-		for (uint32_t j = info_header.height - 1; j > 0; j--)
+		for (uint32_t j = info_header.height; j > 0; j--)
 		{
-			uint32_t line_gap = j * info_header.width;
+			uint32_t line_gap = (j - 1) * info_header.width;
 			infile.read(reinterpret_cast<char*>(pixel_data + line_gap), info_header.width);
 			infile.seekg(padding, std::ios::cur);
 		}
-		infile.read(reinterpret_cast<char*>(pixel_data), info_header.width);
 
 		uint8_t	_palette_type = 0;
 		infile.read(reinterpret_cast<char*>(&_palette_type), sizeof(uint8_t));
@@ -809,6 +811,8 @@ uint8_t	Serializer::chooseSD()
 	Data	data;
 	data.terminal_width = 0;
 	uint8_t	selected_option = chooseOption(data, CHOOSE_SD, 2);
+
+	std::cout << "\033[6;0H";
 
 	setRawMode(false);
 
