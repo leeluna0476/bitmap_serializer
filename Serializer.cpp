@@ -30,7 +30,6 @@ Serializer::Serializer()
 {
 }
 
-// later change cast
 Serializer::Serializer(const Serializer&)
 {
 }
@@ -45,8 +44,10 @@ Serializer::~Serializer()
 
 void	Serializer::setRawMode(const bool enable)
 {
-	static struct termios oldt, newt;
-	if (enable)
+	static struct termios oldt;
+	static struct termios newt;
+
+	if (enable == true)
 	{
 	    // 터미널을 raw 모드로 설정
 	    tcgetattr(0, &oldt);
@@ -61,63 +62,19 @@ void	Serializer::setRawMode(const bool enable)
 	}
 }
 
-uint8_t*	Serializer::generatePalette(uint32_t size, uint32_t color_number)
-{
-	uint8_t*	palette = NULL;
-
-	try
-	{
-		palette = new uint8_t[size];
-
-		for (uint16_t i = 0; i < color_number; i++)
-		{
-			uint16_t index = i << 2; // RGBA 인덱스 (i * 4)
-
-			if (i < 216) {
-				// 216색 RGB 조합 (6단계씩)
-				uint8_t r = (i / 36) % 6;       // R 값 (0~5)
-				uint8_t g = (i / 6) % 6;        // G 값 (0~5)
-				uint8_t b = i % 6;              // B 값 (0~5)
-
-				palette[index] = b * 51;        // B 채널
-				palette[index + 1] = g * 51;    // G 채널
-				palette[index + 2] = r * 51;    // R 채널
-				palette[index + 3] = 0;         // Alpha 채널 (0)
-			}
-			else
-			{
-				// 39색 회색조 추가
-				uint8_t gray = (i - 216) * 6;   // 회색 단계 (0~255)
-				palette[index] = gray;          // R = G = B
-				palette[index + 1] = gray;
-				palette[index + 2] = gray;
-				palette[index + 3] = 0;         // Alpha 채널 (0)
-			}
-		}
-	}
-	catch (const std::exception& e)
-	{
-	}
-
-	return palette;
-}
-
 void	Serializer::clearPixel(Data& data)
 {
 	for (uint32_t j = 0; j < data.terminal_height; j++)
 	{
-		for (uint32_t i = 0; i < data.terminal_width; i++)
-		{
-			data.terminal_pixel_data[j][i] = 0;
-		}
+		std::memset(data.terminal_pixel_data[j], 0, data.terminal_width);
 	}
+
 	initScreen(data);
 }
 
-uint32_t	Serializer::checkEscape(char* cptr)
+uint8_t	Serializer::checkEscape(char* cptr)
 {
-	uint32_t	i = 0;
-	for (; i < 2; i++)
+	for (uint8_t i = 0; i < 2; i++)
 	{
 		std::cin.read(cptr, 1);
 		if (*cptr != "\033["[i])
@@ -170,8 +127,6 @@ uint32_t	Serializer::getPixel(Data& data)
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
 			data.terminal_pixel_data[data.tj][data.ti] = c - '0';
-// 배열에 제대로 저장되고 있는지 테스트하기 위한 코드.
-//			std::cout << data.terminal_pixel_data[data.tj][data.ti];
 			++(data.ti);
 			std::cout << c;
 		}
@@ -320,8 +275,6 @@ void	Serializer::setColorIndex(Data& data)
 	data.color_index[4] = ~(data.bgcolor);
 }
 
-// pixel 10의 배수로 반올림.
-// 혼란을 줄 수 있으니 픽셀 입력 최소 10 이상
 uint32_t	Serializer::setConfig(Data& data)
 {
 	std::cout << CLEAR_SCREEN << std::flush;
@@ -332,18 +285,18 @@ uint32_t	Serializer::setConfig(Data& data)
 	// get user input width
 	std::cout << "[Enter image width]: ";
 	getline(std::cin, user_input);
-	std::istringstream(user_input) >> data.raw_width;
+	std::istringstream(user_input) >> data.image_width;
 	// get user input height
 	std::cout << "[Enter image height]: ";
 	getline(std::cin, user_input);
-	std::istringstream(user_input) >> data.raw_height;
+	std::istringstream(user_input) >> data.image_height;
 
-	// 10자리로 반올림하고 10으로 나눈다.
-	data.terminal_width = (data.raw_width % 10) >= 5 ? (data.raw_width + 10) / 10 : data.raw_width / 10;
-	data.terminal_height = (data.raw_height % 10) >= 5 ? (data.raw_height + 10) / 10 : data.raw_height / 10;
+	// 10의 자리로 반올림하고 10으로 나눈다.
+	data.terminal_width = (data.image_width % 10) >= 5 ? (data.image_width + 10) / 10 : data.image_width / 10;
+	data.terminal_height = (data.image_height % 10) >= 5 ? (data.image_height + 10) / 10 : data.image_height / 10;
 
-	data.raw_width = data.terminal_width * 10;
-	data.raw_height = data.terminal_height * 10;
+	data.image_width = data.terminal_width * 10;
+	data.image_height = data.terminal_height * 10;
 
 	if (data.terminal_width == 0 || data.terminal_height == 0)
 	{
@@ -365,9 +318,6 @@ uint32_t	Serializer::setConfig(Data& data)
 	return 1;
 }
 
-// 박스 크기 입력받고 박스 띄우기.
-// 안내문 띄우기.
-// bar 미리 초기화 해두기.
 void	Serializer::initScreen(Data& data)
 {
 	const char*	palette_name[2] = { "GRAY", "RGB" };
@@ -409,7 +359,6 @@ void	Serializer::initScreen(Data& data)
 	std::cout << LEFT_TOP << std::flush;
 }
 
-// 지정된 문자 외에는 무시.
 void	Serializer::draw(Data& data)
 {
 	try
@@ -438,8 +387,8 @@ void	Serializer::draw(Data& data)
 
 Data*	Serializer::generateImgData()
 {
-
 	Data*	data = NULL;
+
 	try
 	{
 		data = new Data;
@@ -460,19 +409,15 @@ Data*	Serializer::generateImgData()
 	return data;
 }
 
-// uintptr_t의 정체?
 uintptr_t	Serializer::serialize(Data* ptr)
 {
-	struct BmpFileHeader	file_header;
+/////INFO//////HEADER///////////////////////////////////
 	struct BmpInfoHeader	info_header;
 
-/////INFO//////HEADER///////////////////////////////////
 	info_header.size = sizeof(struct BmpInfoHeader);
-	// width, height user decision
-	info_header.width = ptr->raw_width;
-	info_header.height = ptr->raw_height;
+	info_header.width = ptr->image_width;
+	info_header.height = ptr->image_height;
 	info_header.color_plane = 1;
-	// ildan heukbaek. user decision
 	info_header.bits_per_pixel = BITS_DEFAULT;
 	// BI_RGB = 0. no compression.
 	info_header.compression = 0;
@@ -481,12 +426,15 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	info_header.horizontal_resolution = 0;
 	info_header.vertical_resolution = 0;
 	// palette를 사용하지 않을 때(bits_per_pixel > 8)는 0.
-	info_header.color_number = info_header.bits_per_pixel > 8 ? 0 : (1 << info_header.bits_per_pixel);
+	info_header.color_number = 1 << info_header.bits_per_pixel;
 	info_header.color_number_important = 0;
 
 	// 색상 개수 * 4. 바이트 단위.
-	uint32_t	palette_size = info_header.color_number << 2;
+	uint32_t	color_table_size = info_header.color_number << 2;
+
 /////FILE//////HEADER///////////////////////////////////
+	struct BmpFileHeader	file_header;
+
 	file_header.type = ptr->magic_number;
 	// file header size + info header size + palette size + pixel data
 	// 각 픽셀 크기는 bits_per_pixel에 따름, 픽셀 개수는 너비와 동, 패딩 사이즈 = (4 - (pixel % 4)) % 4
@@ -497,15 +445,17 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	// 행 하나에 할당되는 바이트 수.
 	uint32_t	row_size_byte = info_header.width * pixel_size;
 	// 각 행을 4의 배수로 패딩.
+	// 모자란 바이트 수 % 4 (4 - 0 = 4 방지)
 	uint32_t	padding = (4 - (row_size_byte % 4)) % 4;
 	// 패딩 처리한 행의 바이트 수.
 	uint32_t	padded_row_size = row_size_byte + padding;
-	// 패딩 처리한 행 * 높이.
+	// 패딩 처리한 너비 * 높이.
+	// 이미지에 삽입할 픽셀 데이터의 최종 크기.
 	uint32_t	padded_matrix_size = info_header.height * padded_row_size;
 	file_header.size = \
 					   sizeof(struct BmpFileHeader) \
 					   + sizeof(struct BmpInfoHeader) \
-					   + palette_size \
+					   + color_table_size \
 					   + padded_matrix_size;
 
 	file_header.reserved_1 = 0;
@@ -513,27 +463,45 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	file_header.offbits = \
 						  sizeof(struct BmpFileHeader) \
 						  + sizeof(struct BmpInfoHeader) \
-						  + palette_size;
+						  + color_table_size;
 
 /////COLOR//////TABLE///////////////////////////////////
 
-	uint8_t*	palette = NULL;
-	if (info_header.color_number > 0)
-	{
-		// palette type 도 추후에 변수로 받는다.
-		if ((palette = generatePalette(palette_size, info_header.color_number)) == NULL)
-		{
-			std::cerr << "exception" << std::endl;
-			return 0;
-		}
-	}
-
-/////PIXEL//////DATA////////////////////////////////////
-
-	uint8_t*	pixel_data = 0;
+	uint8_t*	color_table = NULL;
+	uint8_t*	pixel_data = NULL;
 
 	try
 	{
+		color_table = new uint8_t[color_table_size];
+
+		for (uint16_t i = 0; i < info_header.color_number; i++)
+		{
+			uint16_t index = i << 2; // RGBA 인덱스 (i * 4)
+
+			if (i < 216) {
+				// 216색 RGB 조합 (6단계씩)
+				uint8_t r = (i / 36) % 6;       // R 값 (0~5)
+				uint8_t g = (i / 6) % 6;        // G 값 (0~5)
+				uint8_t b = i % 6;              // B 값 (0~5)
+
+				color_table[index] = b * 51;        // B 채널
+				color_table[index + 1] = g * 51;    // G 채널
+				color_table[index + 2] = r * 51;    // R 채널
+				color_table[index + 3] = 0;         // Alpha 채널 (0)
+			}
+			else
+			{
+				// 39색 회색조 추가
+				uint8_t gray = (i - 216) * 6;   // 회색 단계 (0~255)
+				color_table[index] = gray;          // R = G = B
+				color_table[index + 1] = gray;
+				color_table[index + 2] = gray;
+				color_table[index + 3] = 0;         // Alpha 채널 (0)
+			}
+		}
+
+/////PIXEL//////DATA////////////////////////////////////
+
 		pixel_data = new uint8_t[padded_matrix_size];
 
 		for (uint32_t j = 0; j < info_header.height; j++)
@@ -554,7 +522,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	}
 	catch (const std::exception& e)
 	{
-		delete[] palette;
+		delete[] color_table;
 		std::cerr << "exception" << std::endl;
 		return 0;
 	}
@@ -565,7 +533,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	if (outfile.is_open() == 0)
 	{
 		std::cerr << "Cannot open file" << std::endl;
-		delete[] palette;
+		delete[] color_table;
 		delete[] pixel_data;
 		return 0;
 	}
@@ -576,10 +544,10 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	// write info header
 	outfile.write(reinterpret_cast<const char*>(&info_header), sizeof(struct BmpInfoHeader));
 
-	// write palette if needed
+	// write color_table if needed
 	if (info_header.color_number != 0)
 	{
-		outfile.write(reinterpret_cast<const char*>(palette), palette_size);
+		outfile.write(reinterpret_cast<const char*>(color_table), color_table_size);
 	}
 
 	// write pixel data
@@ -597,7 +565,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 	outfile.close();
 
-	delete[] palette;
+	delete[] color_table;
 	delete[] pixel_data;
 
 	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
@@ -683,8 +651,8 @@ Data*	Serializer::deserialize(uintptr_t raw)
 // DESERIALIZE
 		ptr = new Data();
 		ptr->magic_number = 0x424D;
-		ptr->raw_width = info_header.width;
-		ptr->raw_height = info_header.height;
+		ptr->image_width = info_header.width;
+		ptr->image_height = info_header.height;
 		ptr->terminal_width = info_header.width / 10;
 		ptr->terminal_height = info_header.height / 10;
 		ptr->filename = _filename;
@@ -703,7 +671,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		for (uint32_t j = 0; j < ptr->terminal_height; j++)
 		{
 			ptr->terminal_pixel_data[j] = new uint8_t[ptr->terminal_width]();
-			uint32_t	line_gap = j * 10 * ptr->raw_width;
+			uint32_t	line_gap = j * 10 * ptr->image_width;
 			for (uint32_t i = 0; i < ptr->terminal_width; i++)
 			{
 				ptr->terminal_pixel_data[j][i] = pixel_data[line_gap + i * 10];

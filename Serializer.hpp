@@ -16,9 +16,8 @@ class	Serializer
 		static const uint8_t	palette[][3];
 
 		static void			setRawMode(bool enable);
-		static uint8_t*		generatePalette(uint32_t size, uint32_t color_number);
 		static void			clearPixel(Data& data);
-		static uint32_t		checkEscape(char* cptr);
+		static uint8_t		checkEscape(char* cptr);
 		static uint32_t		getPixel(Data& data);
 		static void			displayOption(Data& data, enum optionDisplayMode mode, int8_t option);
 		static uint8_t		chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number);
