@@ -1,7 +1,7 @@
 #ifndef BMP_FILE_FORMAT_HPP
 # define BMP_FILE_FORMAT_HPP
 
-# include <cstdint>
+# include <stdint.h>
 
 # define BITS_DEFAULT 8
 

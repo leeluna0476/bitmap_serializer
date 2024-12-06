@@ -431,6 +431,7 @@ void	Serializer::draw(Data& data)
 		}
 
 		std::cout << "\033[" << data.terminal_width + 2 << ";" << 0 << "H" << std::endl;
+		setRawMode(false);
 	}
 	catch (const std::exception& e)
 	{
@@ -562,7 +563,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 /////GENERATE///////IMAGE///////////////////////////////
 
-	std::ofstream	outfile(ptr->filename, std::ios::binary);
+	std::ofstream	outfile(ptr->filename.c_str(), std::ios::binary);
 	if (outfile.is_open() == 0)
 	{
 		std::cerr << "Cannot open file" << std::endl;

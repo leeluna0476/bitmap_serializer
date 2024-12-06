@@ -1,7 +1,7 @@
 #ifndef DATA_HPP
 # define DATA_HPP
 
-# include <cstdint>
+# include <stdint.h>
 # include <string>
 
 # define CLEAR_SCREEN "\033[2J\033[H"
