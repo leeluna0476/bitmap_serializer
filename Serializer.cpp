@@ -6,6 +6,7 @@
 #include <sstream>
 #include <termios.h>
 #include <unistd.h>
+#include <cstring>
 
 const uint8_t Serializer::palette[][3] =
 {
@@ -358,30 +359,27 @@ void	Serializer::initScreen(Data& data)
 	std::cout << LEFT_TOP << std::flush;
 }
 
+// catch문은 바깥에 있음.
 void	Serializer::draw(Data& data)
 {
-	try
-	{
-		data.terminal_pixel_data = new uint8_t*[data.terminal_height];
-		for (uint32_t i = 0; i < data.terminal_height; i++)
-		{
-			data.terminal_pixel_data[i] = new uint8_t[data.terminal_width]();
-		}
+	data.terminal_pixel_data = new uint8_t*[data.terminal_height]();
 
-		for (;;)
-		{
-			if (getPixel(data) == 1)
-			{
-				break;
-			}
-		}
-
-		std::cout << "\033[" << data.terminal_width + 2 << ";" << 0 << "H" << std::endl;
-		setRawMode(false);
-	}
-	catch (const std::exception& e)
+	for (uint32_t i = 0; i < data.terminal_height; i++)
 	{
+		data.terminal_pixel_data[i] = new uint8_t[data.terminal_width]();
 	}
+
+	for (;;)
+	{
+		if (getPixel(data) == 1)
+		{
+			break;
+		}
+	}
+
+	std::cout << "\033[" << data.terminal_width + 2 << ";" << 0 << "H" << std::endl;
+
+	setRawMode(false);
 }
 
 Data*	Serializer::generateImgData()
@@ -390,21 +388,34 @@ Data*	Serializer::generateImgData()
 
 	try
 	{
-		data = new Data;
+		data = new Data();
 
 		if (setConfig(*data) == 0)
 		{
 			throw std::exception();
 		}
+
 		initScreen(*data);
 		draw(*data);
+
 		data->filename += ".bmp";
 	}
 	catch (const std::exception& e)
 	{
+		if (data != NULL && data->terminal_pixel_data != NULL)
+		{
+			for (uint32_t i = 0; i < data->terminal_height; i++)
+			{
+				delete data->terminal_pixel_data[i];
+			}
+
+			delete[] data->terminal_pixel_data;
+		}
+
 		delete data;
 		data = NULL;
 	}
+
 	return data;
 }
 
@@ -466,8 +477,9 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 /////COLOR//////TABLE///////////////////////////////////
 
-	uint8_t*	color_table = NULL;
-	uint8_t*	pixel_data = NULL;
+	uint8_t*		color_table = NULL;
+	uint8_t*		pixel_data = NULL;
+	std::ofstream	outfile;
 
 	try
 	{
@@ -518,54 +530,50 @@ uintptr_t	Serializer::serialize(Data* ptr)
 				pixel_data[line_gap + i] = 0;
 			}
 		}
-	}
-	catch (const std::exception& e)
-	{
-		delete[] color_table;
-		std::cerr << "exception" << std::endl;
-		return 0;
-	}
 
 /////GENERATE///////IMAGE///////////////////////////////
 
-	std::ofstream	outfile(ptr->filename.c_str(), std::ios::binary);
-	if (outfile.is_open() == 0)
-	{
-		std::cerr << "Cannot open file" << std::endl;
-		delete[] color_table;
-		delete[] pixel_data;
-		return 0;
+		outfile.open(ptr->filename.c_str(), std::ios::binary);
+		if (outfile.is_open() == 0)
+		{
+			std::cerr << "Cannot open file" << std::endl;
+			throw std::exception();
+		}
+
+		// write file header
+		outfile.write(reinterpret_cast<const char*>(&file_header), sizeof(struct BmpFileHeader));
+
+		// write info header
+		outfile.write(reinterpret_cast<const char*>(&info_header), sizeof(struct BmpInfoHeader));
+
+		// write color_table if needed
+		if (info_header.color_number != 0)
+		{
+			outfile.write(reinterpret_cast<const char*>(color_table), color_table_size);
+		}
+
+		// write pixel data
+		for (uint32_t i = padded_matrix_size - padded_row_size; i > 0; i -= padded_row_size)
+		{
+			outfile.write(reinterpret_cast<const char*>(&pixel_data[i]), padded_row_size);
+		}
+		outfile.write(reinterpret_cast<const char*>(&pixel_data[0]), padded_row_size);
+
+		if (ptr->magic_number == 0x4A53)
+		{
+			outfile.write(reinterpret_cast<const char*>(&(ptr->palette_type)), sizeof(uint8_t));
+			outfile.write(reinterpret_cast<const char*>(&(ptr->bgcolor)), sizeof(uint8_t));
+		}
 	}
-
-	// write file header
-	outfile.write(reinterpret_cast<const char*>(&file_header), sizeof(struct BmpFileHeader));
-
-	// write info header
-	outfile.write(reinterpret_cast<const char*>(&info_header), sizeof(struct BmpInfoHeader));
-
-	// write color_table if needed
-	if (info_header.color_number != 0)
+	catch (const std::exception& e)
 	{
-		outfile.write(reinterpret_cast<const char*>(color_table), color_table_size);
+		std::cerr << "exception" << std::endl;
 	}
-
-	// write pixel data
-	for (uint32_t i = padded_matrix_size - padded_row_size; i > 0; i -= padded_row_size)
-	{
-		outfile.write(reinterpret_cast<const char*>(&pixel_data[i]), padded_row_size);
-	}
-	outfile.write(reinterpret_cast<const char*>(&pixel_data[0]), padded_row_size);
-
-	if (ptr->magic_number == 0x4A53)
-	{
-		outfile.write(reinterpret_cast<const char*>(&(ptr->palette_type)), sizeof(uint8_t));
-		outfile.write(reinterpret_cast<const char*>(&(ptr->bgcolor)), sizeof(uint8_t));
-	}
-
-	outfile.close();
 
 	delete[] color_table;
 	delete[] pixel_data;
+
+	outfile.close();
 
 	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
 }
@@ -632,8 +640,6 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		}
 		infile.read(reinterpret_cast<char*>(pixel_data), info_header.width);
 
-		// generate charset
-
 		uint8_t	_palette_type = 0;
 		infile.read(reinterpret_cast<char*>(&_palette_type), sizeof(uint8_t));
 
@@ -669,7 +675,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		ptr->terminal_pixel_data = new uint8_t*[ptr->terminal_height]();
 		for (uint32_t j = 0; j < ptr->terminal_height; j++)
 		{
-			ptr->terminal_pixel_data[j] = new uint8_t[ptr->terminal_width]();
+			ptr->terminal_pixel_data[j] = new uint8_t[ptr->terminal_width];
 			uint32_t	line_gap = j * 10 * ptr->image_width;
 			for (uint32_t i = 0; i < ptr->terminal_width; i++)
 			{
@@ -681,25 +687,23 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	{
 		std::cout << "exception" << std::endl;
 
-		infile.close();
-
-		delete[] pixel_data;
-		if (ptr->terminal_pixel_data != NULL)
+		if (ptr != NULL && ptr->terminal_pixel_data != NULL)
 		{
 			for (uint32_t i = 0; i < ptr->terminal_height; i++)
 			{
 				delete ptr->terminal_pixel_data[i];
 			}
-		}
-		delete[] ptr->terminal_pixel_data;
-		delete ptr;
 
-		return NULL;
+			delete[] ptr->terminal_pixel_data;
+		}
+
+		delete ptr;
+		ptr = NULL;
 	}
 
-	infile.close();
-
 	delete[] pixel_data;
+
+	infile.close();
 
 	return ptr;
 }
