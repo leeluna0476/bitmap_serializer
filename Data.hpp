@@ -31,6 +31,7 @@ enum	optionDisplayMode
 	BGCOLOR = 0,
 	PALETTE_TYPE,
 	FINISH_DRAWING,
+	CHOOSE_SD,
 	CLEAR
 };
 

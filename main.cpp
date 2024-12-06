@@ -1,19 +1,67 @@
 #include "Serializer.hpp"
 #include <iostream>
 
-int	main(void)
+inline void	bootSerialization(Data* data)
 {
-	Data*	data = Serializer::generateImgData();
-	if (data != NULL)
+	char*	generated_file = reinterpret_cast<char*>(Serializer::serialize(data));
+
+	if (generated_file == NULL)
 	{
-		Serializer::serialize(data);
-		delete data;
+		std::cerr << "Cannot serialize the file." << std::endl;
 	}
 	else
 	{
-		std::cout << "Failed to generate image data." << std::endl;
+		std::cout << "[" << data->filename << "]" << std::endl;
+	}
+}
+
+int	main(void)
+{
+	// serialize
+	Data*	data;
+	if (Serializer::chooseSD() == FIRST)
+	{
+		data = Serializer::generateImgData();
+
+		if (data == NULL)
+		{
+			std::cerr << "Cannot generate data." << std::endl;
+		}
+		else
+		{
+			bootSerialization(data);
+		}
+	}
+	else
+	{
+		std::cout << CLEAR_SCREEN;
+
+		std::string	_filename;
+		std::cout << "[Enter filename]: ";
+		std::cout << "\n(<filename>.bmp)\033[A\033[2C";
+		getline(std::cin, _filename);
+
+		_filename += ".bmp";
+
+		std::cout << CLEAR_SCREEN;
+
+		data = Serializer::deserialize(reinterpret_cast<uintptr_t>(_filename.c_str()));
+		if (data == NULL)
+		{
+			std::cerr << "Cannot deserialize the file." << std::endl;
+		}
+		else
+		{
+			if (Serializer::reloadTerminalData(data) == 0)
+			{
+				std::cerr << "Cannot load data." << std::endl;
+			}
+			else
+			{
+				bootSerialization(data);
+			}
+		}
 	}
 
-//	Serializer::deserialize(reinterpret_cast<uintptr_t>("test_draft.bmp"));
 	return 0;
 }

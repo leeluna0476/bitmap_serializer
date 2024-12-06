@@ -7,6 +7,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
+#include <cstdio>
 
 const uint8_t Serializer::palette[][3] =
 {
@@ -127,6 +128,7 @@ uint32_t	Serializer::getPixel(Data& data)
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
 			data.terminal_pixel_data[data.tj][data.ti] = c - '0';
+//			std::cout << static_cast<char>(data.terminal_pixel_data[data.tj][data.ti] + '0');
 			++(data.ti);
 			std::cout << c;
 		}
@@ -166,6 +168,13 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"└───────────────────────────┘"
 		},
 		{
+			"┌───────────────────────────┐",
+			"│      Select   action      │",
+			"│                           │",
+			"│     [New]   [Drafted]     │",
+			"└───────────────────────────┘"
+		},
+		{
 			"                             ",
 			"                             ",
 			"                             ",
@@ -189,6 +198,11 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"│ \033[44m[Continue]\033[0m [Save] [Draft] │",
 			"│ [Continue] \033[44m[Save]\033[0m [Draft] │",
 			"│ [Continue] [Save] \033[44m[Draft]\033[0m │"
+		},
+		{
+			"│     \033[44m[New]\033[0m   [Drafted]     │",
+			"│     [New]   \033[44m[Drafted]\033[0m     │",
+			""
 		}
 	};
 
@@ -202,6 +216,10 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 	{
 		tab_vert = 14;
 		tab_horiz = data.terminal_width + 6;
+	}
+	else if (mode == CHOOSE_SD)
+	{
+		tab_vert = 1;
 	}
 
 	for (uint8_t i = 0; i < 5; i++)
@@ -251,11 +269,11 @@ uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_
 		}
 	}
 
-	if (option == 2)
+	if (option == THIRD)
 	{
 		data.magic_number = 0x4A53;
 		data.filename += "_draft";
-		option = 0;
+		option = 1;
 	}
 
 	// 커서 위치 복원
@@ -362,11 +380,34 @@ void	Serializer::initScreen(Data& data)
 // catch문은 바깥에 있음.
 void	Serializer::draw(Data& data)
 {
-	data.terminal_pixel_data = new uint8_t*[data.terminal_height]();
-
-	for (uint32_t i = 0; i < data.terminal_height; i++)
+	if (data.terminal_pixel_data == NULL)
 	{
-		data.terminal_pixel_data[i] = new uint8_t[data.terminal_width]();
+		data.terminal_pixel_data = new uint8_t*[data.terminal_height]();
+
+		for (uint32_t i = 0; i < data.terminal_height; i++)
+		{
+			data.terminal_pixel_data[i] = new uint8_t[data.terminal_width]();
+		}
+	}
+	else
+	{
+		for (uint32_t j = 0; j < data.terminal_height; j++)
+		{
+			std::cout << "\033[" << j + 2 << ";2H";
+			for (uint32_t i = 0; i < data.terminal_width; i++)
+			{
+				if (data.terminal_pixel_data[j][i] == 0)
+				{
+					std::cout << ' ';
+				}
+				else
+				{
+					char	c = data.terminal_pixel_data[j][i] + '0';
+					std::cout << c;
+				}
+			}
+		}
+		std::cout << LEFT_TOP;
 	}
 
 	for (;;)
@@ -603,7 +644,6 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	infile.seekg(16, std::ios::cur);
 	infile.read(reinterpret_cast<char*>(&(info_header.width)), 4);
 	infile.read(reinterpret_cast<char*>(&(info_header.height)), 4);
-	std::cout << info_header.width << std::endl;
 
 	if (info_header.width % 10 != 0 || info_header.height % 10 != 0)
 	{
@@ -643,19 +683,42 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		uint8_t	_palette_type = 0;
 		infile.read(reinterpret_cast<char*>(&_palette_type), sizeof(uint8_t));
 
-		uint32_t	charset = (palette[_palette_type][2] << 16) | (palette[_palette_type][1] << 8) | palette[_palette_type][0];
+		uint8_t	_bgcolor = 0;
+		infile.read(reinterpret_cast<char*>(&_bgcolor), sizeof(uint8_t));
+		uint8_t	_rev_bgcolor = ~_bgcolor;
+
 		for (uint32_t i = 0; i < matrix_size; i++)
 		{
-			uint8_t c = pixel_data[i];
-			if ((c == 0x0 || c == 0xFF || (charset & c)) == false)
+			uint32_t	k = 0;
+			for (; k < 3; k++)
 			{
-				throw std::exception();
+				if (pixel_data[i] == palette[_palette_type][k])
+				{
+					pixel_data[i] = k + 1;
+					break;
+				}
+			}
+
+			if (k == 3)
+			{
+				if (pixel_data[i] == _bgcolor)
+				{
+					pixel_data[i] = 0;
+				}
+				else if (pixel_data[i] == _rev_bgcolor)
+				{
+					pixel_data[i] = 4;
+				}
+				else
+				{
+					throw std::exception();
+				}
 			}
 		}
 
 // DESERIALIZE
 		ptr = new Data();
-		ptr->magic_number = 0x424D;
+		ptr->magic_number = 0x4D42;
 		ptr->image_width = info_header.width;
 		ptr->image_height = info_header.height;
 		ptr->terminal_width = info_header.width / 10;
@@ -665,12 +728,12 @@ Data*	Serializer::deserialize(uintptr_t raw)
 		size_t	pos = ptr->filename.rfind("_draft.bmp");
 		if (pos != std::string::npos)
 		{
-			ptr->filename[pos] = '\0';
+			ptr->filename.erase(pos);
 		}
 
 		ptr->palette_type = _palette_type;
-
-		infile.read(reinterpret_cast<char*>(&(ptr->bgcolor)), sizeof(uint8_t));
+		ptr->bgcolor = _bgcolor;
+		setColorIndex(*ptr);
 
 		ptr->terminal_pixel_data = new uint8_t*[ptr->terminal_height]();
 		for (uint32_t j = 0; j < ptr->terminal_height; j++)
@@ -706,4 +769,49 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	infile.close();
 
 	return ptr;
+}
+
+uint32_t	Serializer::reloadTerminalData(Data* data)
+{
+	setRawMode(true);
+
+	try
+	{
+		initScreen(*data);
+		draw(*data);
+
+		data->filename += ".bmp";
+	}
+	catch (const std::exception& e)
+	{
+		if (data->terminal_pixel_data != NULL)
+		{
+			for (uint32_t i = 0; i < data->terminal_height; i++)
+			{
+				delete data->terminal_pixel_data[i];
+			}
+
+			delete[] data->terminal_pixel_data;
+			data->terminal_pixel_data = NULL;
+		}
+
+		return 0;
+	}
+
+	return 1;
+}
+
+uint8_t	Serializer::chooseSD()
+{
+	setRawMode(true);
+
+	std::cout << CLEAR_SCREEN;
+
+	Data	data;
+	data.terminal_width = 0;
+	uint8_t	selected_option = chooseOption(data, CHOOSE_SD, 2);
+
+	setRawMode(false);
+
+	return selected_option;
 }
