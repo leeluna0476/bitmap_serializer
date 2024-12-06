@@ -30,6 +30,8 @@ class	Serializer
 		static uintptr_t	serialize(Data* ptr);
 		static Data*		deserialize(uintptr_t raw);
 		static uint32_t		reloadTerminalData(Data* data);
+
+		static uint8_t		chooseSD();
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
+#include <cstdio>
 
 const uint8_t Serializer::palette[][3] =
 {
@@ -167,6 +168,13 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"└───────────────────────────┘"
 		},
 		{
+			"┌───────────────────────────┐",
+			"│      Select   action      │",
+			"│                           │",
+			"│     [New]   [Drafted]     │",
+			"└───────────────────────────┘"
+		},
+		{
 			"                             ",
 			"                             ",
 			"                             ",
@@ -190,6 +198,11 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"│ \033[44m[Continue]\033[0m [Save] [Draft] │",
 			"│ [Continue] \033[44m[Save]\033[0m [Draft] │",
 			"│ [Continue] [Save] \033[44m[Draft]\033[0m │"
+		},
+		{
+			"│     \033[44m[New]\033[0m   [Drafted]     │",
+			"│     [New]   \033[44m[Drafted]\033[0m     │",
+			""
 		}
 	};
 
@@ -203,6 +216,10 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 	{
 		tab_vert = 14;
 		tab_horiz = data.terminal_width + 6;
+	}
+	else if (mode == CHOOSE_SD)
+	{
+		tab_vert = 1;
 	}
 
 	for (uint8_t i = 0; i < 5; i++)
@@ -252,7 +269,7 @@ uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_
 		}
 	}
 
-	if (option == 2)
+	if (option == THIRD)
 	{
 		data.magic_number = 0x4A53;
 		data.filename += "_draft";
@@ -627,7 +644,6 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	infile.seekg(16, std::ios::cur);
 	infile.read(reinterpret_cast<char*>(&(info_header.width)), 4);
 	infile.read(reinterpret_cast<char*>(&(info_header.height)), 4);
-	std::cout << info_header.width << std::endl;
 
 	if (info_header.width % 10 != 0 || info_header.height % 10 != 0)
 	{
@@ -669,6 +685,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 
 		uint8_t	_bgcolor = 0;
 		infile.read(reinterpret_cast<char*>(&_bgcolor), sizeof(uint8_t));
+		uint8_t	_rev_bgcolor = ~_bgcolor;
 
 		for (uint32_t i = 0; i < matrix_size; i++)
 		{
@@ -688,7 +705,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 				{
 					pixel_data[i] = 0;
 				}
-				else if (pixel_data[i] == (~_bgcolor))
+				else if (pixel_data[i] == _rev_bgcolor)
 				{
 					pixel_data[i] = 4;
 				}
@@ -782,4 +799,19 @@ uint32_t	Serializer::reloadTerminalData(Data* data)
 	}
 
 	return 1;
+}
+
+uint8_t	Serializer::chooseSD()
+{
+	setRawMode(true);
+
+	std::cout << CLEAR_SCREEN;
+
+	Data	data;
+	data.terminal_width = 0;
+	uint8_t	selected_option = chooseOption(data, CHOOSE_SD, 2);
+
+	setRawMode(false);
+
+	return selected_option;
 }
