@@ -1,7 +1,7 @@
 .DEFAULT_GOAL=all
 
 NAME=bmp_serializer
-CXX=g++
+CXX=c++
 CXXFLAGS=-Wall -Wextra -Werror -Wpedantic -std=c++98
 CPPFLAGS=-MMD -MP -MF $(DEPS_DIR)/$*.d
 

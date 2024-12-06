@@ -34,16 +34,13 @@ int	main(void)
 	}
 	else
 	{
-		std::cout << CLEAR_SCREEN;
-
 		std::string	_filename;
 		std::cout << "[Enter filename]: ";
-		std::cout << "\n(<filename>.bmp)\033[A\033[2C";
+		std::cout << "\n(<filename>.bmp)" << CURSOR_RIGHT << CURSOR_RIGHT << CURSOR_UP;
 		getline(std::cin, _filename);
+		std::cout << CURSOR_DOWN;
 
 		_filename += ".bmp";
-
-		std::cout << CLEAR_SCREEN;
 
 		data = Serializer::deserialize(reinterpret_cast<uintptr_t>(_filename.c_str()));
 		if (data == NULL)
