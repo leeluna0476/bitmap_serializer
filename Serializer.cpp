@@ -7,7 +7,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-//Data	Serializer::data;
 const uint8_t Serializer::palette[][3] =
 {
 	// GRAY
