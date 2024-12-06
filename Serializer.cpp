@@ -7,7 +7,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
-#include <cstdio>
 
 const uint8_t Serializer::palette[][3] =
 {
