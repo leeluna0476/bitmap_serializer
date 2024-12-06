@@ -410,10 +410,10 @@ Data*	Serializer::generateImgData()
 			}
 
 			delete[] data->terminal_pixel_data;
-			delete data;
-
-			data = NULL;
 		}
+
+		delete data;
+		data = NULL;
 	}
 
 	return data;
@@ -570,15 +570,8 @@ uintptr_t	Serializer::serialize(Data* ptr)
 		std::cerr << "exception" << std::endl;
 	}
 
-	if (color_table)
-	{
-		delete[] color_table;
-	}
-
-	if (pixel_data)
-	{
-		delete[] pixel_data;
-	}
+	delete[] color_table;
+	delete[] pixel_data;
 
 	outfile.close();
 
@@ -694,17 +687,17 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	{
 		std::cout << "exception" << std::endl;
 
-		if (ptr->terminal_pixel_data != NULL)
+		if (ptr != NULL && ptr->terminal_pixel_data != NULL)
 		{
 			for (uint32_t i = 0; i < ptr->terminal_height; i++)
 			{
 				delete ptr->terminal_pixel_data[i];
 			}
+
+			delete[] ptr->terminal_pixel_data;
 		}
 
-		delete[] ptr->terminal_pixel_data;
 		delete ptr;
-
 		ptr = NULL;
 	}
 
