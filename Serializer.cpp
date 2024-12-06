@@ -31,14 +31,12 @@ Serializer::Serializer()
 }
 
 // later change cast
-Serializer::Serializer(const Serializer& other)
+Serializer::Serializer(const Serializer&)
 {
-	(void)other;
 }
 
-void	Serializer::operator=(const Serializer& other)
+void	Serializer::operator=(const Serializer&)
 {
-	(void)other;
 }
 
 Serializer::~Serializer()

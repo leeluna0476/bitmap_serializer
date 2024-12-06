@@ -9,11 +9,10 @@ class	Serializer
 		// no instanciation
 		// OCCF
 		Serializer();
-		Serializer(const Serializer& other);
-		void	operator=(const Serializer& other);
+		Serializer(const Serializer&);
+		void	operator=(const Serializer&);
 		~Serializer();
 
-//		static Data		data;
 		static const uint8_t	palette[][3];
 
 		static void			setRawMode(bool enable);
