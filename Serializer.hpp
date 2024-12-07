@@ -34,4 +34,6 @@ class	Serializer
 		static uint8_t		chooseSD();
 };
 
+void	freeTerminalData(Data* data);
+
 #endif

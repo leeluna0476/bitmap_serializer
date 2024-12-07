@@ -1,7 +1,7 @@
 #include "Serializer.hpp"
 #include <iostream>
 
-inline void	bootSerialization(Data* data)
+static void	bootSerialization(Data* data)
 {
 	char*	generated_file = reinterpret_cast<char*>(Serializer::serialize(data));
 
@@ -30,6 +30,8 @@ int	main(void)
 		else
 		{
 			bootSerialization(data);
+			freeTerminalData(data);
+			delete data;
 		}
 	}
 	else
@@ -57,6 +59,8 @@ int	main(void)
 			{
 				bootSerialization(data);
 			}
+			freeTerminalData(data);
+			delete data;
 		}
 	}
 

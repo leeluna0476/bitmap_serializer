@@ -11,7 +11,7 @@
 # define CURSOR_RIGHT "\033[C"
 # define CURSOR_LEFT "\033[D"
 
-// palette Type
+// Palette Type
 # define GRAY 0
 # define RGB 1
 
@@ -19,12 +19,6 @@
 # define FIRST 0
 # define SECOND 1
 # define THIRD 2
-
-//enum	paletteType
-//{
-//	GRAY = 0,
-//	RGB
-//};
 
 enum	optionDisplayMode
 {

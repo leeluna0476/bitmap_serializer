@@ -445,16 +445,10 @@ Data*	Serializer::generateImgData()
 	}
 	catch (const std::exception& e)
 	{
-		if (data != NULL && data->terminal_pixel_data != NULL)
+		if (data != NULL)
 		{
-			for (uint32_t i = 0; i < data->terminal_height; i++)
-			{
-				delete data->terminal_pixel_data[i];
-			}
-
-			delete[] data->terminal_pixel_data;
+			freeTerminalData(data);
 		}
-
 		delete data;
 		data = NULL;
 	}
@@ -751,16 +745,10 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	{
 		std::cout << "exception" << std::endl;
 
-		if (ptr != NULL && ptr->terminal_pixel_data != NULL)
+		if (ptr != NULL)
 		{
-			for (uint32_t i = 0; i < ptr->terminal_height; i++)
-			{
-				delete ptr->terminal_pixel_data[i];
-			}
-
-			delete[] ptr->terminal_pixel_data;
+			freeTerminalData(ptr);
 		}
-
 		delete ptr;
 		ptr = NULL;
 	}
@@ -785,17 +773,7 @@ uint32_t	Serializer::reloadTerminalData(Data* data)
 	}
 	catch (const std::exception& e)
 	{
-		if (data->terminal_pixel_data != NULL)
-		{
-			for (uint32_t i = 0; i < data->terminal_height; i++)
-			{
-				delete data->terminal_pixel_data[i];
-			}
-
-			delete[] data->terminal_pixel_data;
-			data->terminal_pixel_data = NULL;
-		}
-
+		freeTerminalData(data);
 		return 0;
 	}
 
@@ -817,4 +795,18 @@ uint8_t	Serializer::chooseSD()
 	setRawMode(false);
 
 	return selected_option;
+}
+
+void	freeTerminalData(Data* data)
+{
+	if (data->terminal_pixel_data != NULL)
+	{
+		for (uint32_t i = 0; i < data->terminal_height; i++)
+		{
+			delete data->terminal_pixel_data[i];
+		}
+
+		delete[] data->terminal_pixel_data;
+		data->terminal_pixel_data = NULL;
+	}
 }
