@@ -14,6 +14,7 @@
 // Palette Type
 # define GRAY 0
 # define RGB 1
+# define PURPLE 2
 
 // Button no.
 # define FIRST 0

@@ -21,6 +21,12 @@ const uint8_t Serializer::palette[][3] =
 		180,
 		18,
 		5
+	},
+	// PURPLE
+	{
+		82,
+		81,
+		80
 	}
 };
 
@@ -155,7 +161,7 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			"┌───────────────────────────┐",
 			"│      Select  palette      │",
 			"│                           │",
-			"│      [GRAY]    [RGB]      │",
+			"│   [GRAY] [RGB] [PURPLE]   │",
 			"└───────────────────────────┘"
 		},
 		{
@@ -188,9 +194,9 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 			""
 		},
 		{
-			"│      \033[44m[GRAY]\033[0m    [RGB]      │",
-			"│      [GRAY]    \033[44m[RGB]\033[0m      │",
-			""
+			"│   \033[44m[GRAY]\033[0m [RGB] [PURPLE]   │",
+			"│   [GRAY] \033[44m[RGB]\033[0m [PURPLE]   │",
+			"│   [GRAY] [RGB] \033[44m[PURPLE]\033[0m   │",
 		},
 		{
 			"│ \033[44m[Continue]\033[0m [Save] [Draft] │",
@@ -330,7 +336,7 @@ uint32_t	Serializer::setConfig(Data& data)
 	setRawMode(true);
 
 	data.bgcolor = chooseOption(data, BGCOLOR, 2) * 0xFF;
-	data.palette_type = chooseOption(data, PALETTE_TYPE, 2);
+	data.palette_type = chooseOption(data, PALETTE_TYPE, 3);
 
 	setColorIndex(data);
 
@@ -339,7 +345,7 @@ uint32_t	Serializer::setConfig(Data& data)
 
 void	Serializer::initScreen(Data& data)
 {
-	const char*	palette_name[2] = { "GRAY", "RGB" };
+	const char*	palette_name[3] = { "GRAY", "RGB", "PURPLE" };
 	const char*	background_name[2] = { "BLACK", "WHITE" };
 
 	data.ti = 0;
