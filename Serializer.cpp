@@ -4,9 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 #include <termios.h>
 #include <unistd.h>
-#include <cstring>
 
 const uint8_t Serializer::palette[][3] =
 {
@@ -127,7 +127,6 @@ uint32_t	Serializer::getPixel(Data& data)
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
 			data.terminal_pixel_data[data.tj][data.ti] = c - '0';
-//			std::cout << static_cast<char>(data.terminal_pixel_data[data.tj][data.ti] + '0');
 			++(data.ti);
 			std::cout << c;
 		}
