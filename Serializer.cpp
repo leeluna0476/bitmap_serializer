@@ -516,6 +516,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	uint8_t*		color_table = NULL;
 	uint8_t*		pixel_data = NULL;
 	std::ofstream	outfile;
+	uintptr_t		ret;
 
 	try
 	{
@@ -569,7 +570,9 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 /////GENERATE///////IMAGE///////////////////////////////
 
-		outfile.open(ptr->filename.c_str(), std::ios::binary);
+		const char*	_filename = ptr->filename.c_str();
+		ret = reinterpret_cast<uintptr_t>(_filename);
+		outfile.open(_filename, std::ios::binary);
 		if (outfile.is_open() == 0)
 		{
 			std::cerr << "Cannot open file" << std::endl;
@@ -603,7 +606,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "exception" << std::endl;
+		ret = 0;
 	}
 
 	delete[] color_table;
@@ -611,7 +614,7 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 	outfile.close();
 
-	return reinterpret_cast<uintptr_t>(ptr->filename.c_str());
+	return ret;
 }
 
 // raw == draft filename
@@ -742,8 +745,6 @@ Data*	Serializer::deserialize(uintptr_t raw)
 	}
 	catch (const std::exception& e)
 	{
-		std::cout << "exception" << std::endl;
-
 		if (ptr != NULL)
 		{
 			freeTerminalData(ptr);
