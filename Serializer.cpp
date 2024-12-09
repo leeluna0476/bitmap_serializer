@@ -53,10 +53,10 @@ void	Serializer::setRawMode(const bool enable)
 	static struct termios oldt;
 	static struct termios newt;
 
-	// 원래 터미널 설정 저장.
-	tcgetattr(0, &oldt);
 	if (enable == true)
 	{
+		// 원래 터미널 설정 저장.
+		tcgetattr(0, &oldt);
 		// 터미널을 raw 모드로 설정.
 		newt = oldt;
 		newt.c_lflag &= ~(ICANON | ECHO);
