@@ -20,8 +20,8 @@ struct	BmpFileHeader
 struct	BmpInfoHeader
 {
 	uint32_t	size;					// the size of this header, in bytes (40)
-	uint32_t	width;					// the bitmap width in pixels (signed integer)
-	uint32_t	height;					// the bitmap height in pixels (signed integer)
+	int32_t	width;					// the bitmap width in pixels (signed integer)
+	int32_t	height;					// the bitmap height in pixels (signed integer)
 	uint16_t	color_plane;			// the number of color planes (must be 1)
 	uint16_t	bits_per_pixel;			// the number of bits per pixel, which is the color depth of the image.
 	uint32_t	compression;			// the compression method being used.
