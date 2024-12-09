@@ -495,15 +495,15 @@ uintptr_t	Serializer::serialize(Data* ptr)
 	// 픽셀 하나에 할당되는 바이트 수. // 8로 올림을 한 뒤 잘랐는데 지금 시점에서는 의미 없어보임.
 	uint16_t	pixel_size = (info_header.bits_per_pixel + 7) >> 3;
 	// 행 하나에 할당되는 바이트 수.
-	uint32_t	row_size_byte = info_header.width * pixel_size;
+	int32_t	row_size_byte = info_header.width * pixel_size;
 	// 각 행을 4의 배수로 패딩.
 	// 모자란 바이트 수 % 4 (4 - 0 = 4 방지)
-	uint32_t	padding = (4 - (row_size_byte % 4)) % 4;
+	int32_t	padding = (4 - (row_size_byte % 4)) % 4;
 	// 패딩 처리한 행의 바이트 수.
-	uint32_t	padded_row_size = row_size_byte + padding;
+	int32_t	padded_row_size = row_size_byte + padding;
 	// 패딩 처리한 너비 * 높이.
 	// 이미지에 삽입할 픽셀 데이터의 최종 크기.
-	uint32_t	padded_matrix_size = info_header.height * padded_row_size;
+	int32_t	padded_matrix_size = info_header.height * padded_row_size;
 	file_header.size = \
 					   sizeof(struct BmpFileHeader) \
 					   + sizeof(struct BmpInfoHeader) \
@@ -558,11 +558,11 @@ uintptr_t	Serializer::serialize(Data* ptr)
 
 		pixel_data = new uint8_t[padded_matrix_size];
 
-		for (uint32_t j = 0; j < info_header.height; j++)
+		for (int32_t j = 0; j < info_header.height; j++)
 		{
-			uint32_t	line_gap = j * padded_row_size;
-			uint32_t	_j = j / 10;
-			uint32_t	i = 0;
+			int32_t	line_gap = j * padded_row_size;
+			int32_t	_j = j / 10;
+			int32_t	i = 0;
 			for ( ; i < info_header.width; i++)
 			{
 				pixel_data[line_gap + i] = ptr->color_index[ptr->terminal_pixel_data[_j][i / 10]];
