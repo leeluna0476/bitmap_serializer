@@ -40,7 +40,7 @@ Serializer::Serializer(const Serializer&)
 {
 }
 
-void	Serializer::operator=(const Serializer&)
+Serializer&	Serializer::operator=(const Serializer&)
 {
 }
 
