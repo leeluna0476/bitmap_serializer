@@ -2,7 +2,7 @@
 
 NAME=bmp_serializer
 CXX=c++
-CXXFLAGS=-Wall -Wextra -Werror -Wpedantic -std=c++98
+CXXFLAGS=-Wall -Wextra -Werror -Wpedantic -std=c++98 -fshort-enums
 CPPFLAGS=-MMD -MP -MF $(DEPS_DIR)/$*.d
 
 RM=rm -fr
