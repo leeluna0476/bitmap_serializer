@@ -18,9 +18,9 @@ class	Serializer
 		static void			setRawMode(bool enable);
 		static void			clearPixel(Data& data);
 		static uint8_t		checkEscape(char* cptr);
-		static uint32_t		getPixel(Data& data);
-		static void			displayOption(Data& data, enum optionDisplayMode mode, int8_t option);
-		static uint8_t		chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number);
+		static uint8_t		getPixel(Data& data);
+		static void			displayOption(Data& data, enum optionDisplayMode mode, union Option option);
+		static union Option	chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number);
 		static void			setColorIndex(Data& data);
 		static uint32_t		setConfig(Data& data);
 		static void			initScreen(Data& data);
@@ -31,7 +31,7 @@ class	Serializer
 		static Data*		deserialize(uintptr_t raw);
 		static uint32_t		reloadTerminalData(Data* data);
 
-		static uint8_t		chooseSD();
+		static union Option	chooseSD();
 };
 
 void	freeTerminalData(Data* data);

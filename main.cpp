@@ -19,7 +19,7 @@ int	main(void)
 {
 	// serialize
 	Data*	data;
-	if (Serializer::chooseSD() == FIRST)
+	if (Serializer::chooseSD().enumerate == FIRST)
 	{
 		data = Serializer::generateImgData();
 

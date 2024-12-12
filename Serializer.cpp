@@ -94,10 +94,10 @@ uint8_t	Serializer::checkEscape(char* cptr)
 }
 
 // 유저가 픽셀을 입력하는 즉시 배열에 저장하고 화면에 띄운다.
-uint32_t	Serializer::getPixel(Data& data)
+uint8_t	Serializer::getPixel(Data& data)
 {
 	char		c;
-	uint32_t	ret = 0;
+	uint8_t	ret = 0;
 	if (checkEscape(&c) == 1) // move cursor if escape
 	{
 		std::cin.read(&c, 1);
@@ -130,7 +130,7 @@ uint32_t	Serializer::getPixel(Data& data)
 		}
 		else if (c == '\n') // 입력 끝?
 		{
-			ret = chooseOption(data, FINISH_DRAWING, 3);
+			ret = chooseOption(data, FINISH_DRAWING, 3).raw;
 		}
 		else if ((c == '1' || c == '2' || c == '3' || c == '4') && data.ti < data.terminal_width)
 		{
@@ -148,7 +148,7 @@ uint32_t	Serializer::getPixel(Data& data)
 	return ret;
 }
 
-void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t option)
+void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, union Option option)
 {
 	static const char*	option_box[][5] =
 	{
@@ -237,17 +237,18 @@ void	Serializer::displayOption(Data& data, enum optionDisplayMode mode, int8_t o
 	if (mode != CLEAR)
 	{
 		std::cout << "\033[" << tab_vert - 2 << ";" << tab_horiz << "H";
-		std::cout << option_highlight[mode][option];
+		std::cout << option_highlight[mode][option.raw];
 	}
 }
 
-uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number)
+union Option	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_t button_number)
 {
 	// 커서 숨기기
 	std::cout << "\033[?25l";
 
-	displayOption(data, mode, FIRST);
-	int8_t	option = FIRST;
+	union Option	option;
+	option.enumerate = FIRST;
+	displayOption(data, mode, option);
 
 	char	c;
 	for (;;)
@@ -257,11 +258,11 @@ uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_
 			std::cin.read(&c, 1);
 			if (c == 'C')
 			{
-				option = (option + 1) % button_number;
+				option.raw = (option.raw + 1) % button_number;
 			}
 			else if (c == 'D')
 			{
-				option = (option - 1 + button_number) % button_number;
+				option.raw = (option.raw - 1 + button_number) % button_number;
 			}
 			displayOption(data, mode, option);
 		}
@@ -269,17 +270,17 @@ uint8_t	Serializer::chooseOption(Data& data, enum optionDisplayMode mode, uint8_
 		{
 			if (mode == FINISH_DRAWING)
 			{
-				displayOption(data, CLEAR, FIRST);
-				if (option == FIRST)
+				displayOption(data, CLEAR, option);
+				if (option.enumerate == FIRST)
 				{
 					// 커서 위치 복원
 					std::cout << "\033[" << data.tj + 2 << ";" << data.ti + 2 << "H";
 				}
-				else if (option == THIRD)
+				else if (option.enumerate == THIRD)
 				{
 					data.magic_number = 0x4A53;
 					data.filename += "_draft";
-					option = 1;
+					option.enumerate = SECOND;
 				}
 			}
 			break;
@@ -337,8 +338,8 @@ uint32_t	Serializer::setConfig(Data& data)
 
 	setRawMode(true);
 
-	data.bgcolor = chooseOption(data, BGCOLOR, 2) * 0xFF;
-	data.palette_type = chooseOption(data, PALETTE_TYPE, 3);
+	data.bgcolor = chooseOption(data, BGCOLOR, 2).raw * 0xFF;
+	data.palette_type = chooseOption(data, PALETTE_TYPE, 3).enumerate;
 
 	setColorIndex(data);
 
@@ -685,8 +686,9 @@ Data*	Serializer::deserialize(uintptr_t raw)
 			infile.seekg(padding, std::ios::cur);
 		}
 
-		uint8_t	_palette_type = 0;
-		infile.read(reinterpret_cast<char*>(&_palette_type), sizeof(uint8_t));
+		union Option	_palette_type;
+		_palette_type.raw = 0;
+		infile.read(reinterpret_cast<char*>(&_palette_type.raw), sizeof(uint8_t));
 
 		uint8_t	_bgcolor = 0;
 		infile.read(reinterpret_cast<char*>(&_bgcolor), sizeof(uint8_t));
@@ -697,7 +699,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 			uint32_t	k = 0;
 			for (; k < 3; k++)
 			{
-				if (pixel_data[i] == palette[_palette_type][k])
+				if (pixel_data[i] == palette[_palette_type.raw][k])
 				{
 					pixel_data[i] = k + 1;
 					break;
@@ -736,7 +738,7 @@ Data*	Serializer::deserialize(uintptr_t raw)
 			ptr->filename.erase(pos);
 		}
 
-		ptr->palette_type = _palette_type;
+		ptr->palette_type = _palette_type.enumerate;
 		ptr->bgcolor = _bgcolor;
 		setColorIndex(*ptr);
 
@@ -788,7 +790,7 @@ uint32_t	Serializer::reloadTerminalData(Data* data)
 	return 1;
 }
 
-uint8_t	Serializer::chooseSD()
+union Option	Serializer::chooseSD()
 {
 	setRawMode(true);
 
@@ -796,13 +798,14 @@ uint8_t	Serializer::chooseSD()
 
 	Data	data;
 	data.terminal_width = 0;
-	uint8_t	selected_option = chooseOption(data, CHOOSE_SD, 2);
+
+	union Option	option = chooseOption(data, CHOOSE_SD, 2);
 
 	std::cout << "\033[6;0H";
 
 	setRawMode(false);
 
-	return selected_option;
+	return option;
 }
 
 void	freeTerminalData(Data* data)
