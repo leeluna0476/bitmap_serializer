@@ -11,29 +11,6 @@
 # define CURSOR_RIGHT "\033[C"
 # define CURSOR_LEFT "\033[D"
 
-// Palette Type
-//# define GRAY 0
-//# define RGB 1
-//# define PURPLE 2
-
-// Button no.
-//# define FIRST 0
-//# define SECOND 1
-//# define THIRD 2
-
-//enum	paletteType
-//{
-//	GRAY = 0,
-//	RGB,
-//	PURPLE
-//};
-//
-//union	PaletteType
-//{
-//	uint8_t				raw;
-//	enum paletteType	enumerate;
-//};
-
 enum	option
 {
 	FIRST = 0,
