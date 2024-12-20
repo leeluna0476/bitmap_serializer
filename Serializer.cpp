@@ -29,7 +29,6 @@ const uint8_t Serializer::palette[][3] =
 	}
 };
 
-
 // OCCF
 Serializer::Serializer()
 {
