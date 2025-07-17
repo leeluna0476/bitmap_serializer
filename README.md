@@ -12,8 +12,8 @@ make
 1. Draw a new picture.
    - Set the image size.
    - Set the filename.
-   - Select a color palette. (Gray, RGB, Purple, or else)
-   - Select a background color. (Black or White)
+   - Choose a color palette. (Gray, RGB, Purple, or else)
+   - Choose a background color. (Black or White)
    - And... DRAW!
 2. Load a drafted file.
    - Continue drawing.
